@@ -3,6 +3,7 @@ require 'activerecord'
 require 'md5'
 require File.dirname(__FILE__) + '/vendor/active_document/lib/active_document'
 
+ActiveDocument::Base.docs_base_path File.dirname(__FILE__) + '/posts'
 autoload :Post, File.dirname(__FILE__) + '/models/post'
 
 # 
