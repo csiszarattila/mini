@@ -1,0 +1,3 @@
+[submodule "vendor/active_document"]
+	path = vendor/active_document
+	url = /Users/attilacsiszar/gitish/active_document
