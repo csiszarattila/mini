@@ -1,7 +1,9 @@
 require 'rubygems'
 require 'activerecord'
 require 'md5'
-require 'vendoractivedocument'
+require File.dirname(__FILE__) + '/vendor/active_document/lib/active_document'
+
+autoload :Post, File.dirname(__FILE__) + '/models/post'
 
 # 
 # Lokalizációs felülírás a magyar hónapnevekre
