@@ -1,0 +1,29 @@
+!!!Strict
+%head
+  %title Rubysztán
+  %meta{"http-equiv"=>"Content-Type", :content=>"text/html;charset=utf-8"}
+  %meta{:name=>"description", :value=>"Cikkek a Ruby programozási nyelvről, nemcsak webfejlesztéssel kapcsolatban."}
+  %link{:href=>"/rubysztan/stylesheets/rubysztan.css", :rel=>"stylesheet", :type=>"text/css", :media=>"screen"}
+  =rss_link(:title=>"Cikkek hírcsatornája")
+  <script type="text/javascript">
+  var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+  document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+  </script>
+  <script type="text/javascript">
+  try {
+  var pageTracker = _gat._getTracker("UA-1524576-2");
+  pageTracker._trackPageview();
+  } catch(err) {}</script>
+%body
+  #content
+    #navigation
+      %a{:href=>"http://csiszarattila.com"} csiszarattila.com 
+      \/
+      %a{:href=>"/rubysztan/"}Rubysztán
+      -if @document
+        \/
+        = @document.title.scan(/./u)[0,15] << "..."
+    #body
+      = yield
+    #legal-notes
+      &copy;2008-2009 Csiszár Attila <br/> Az oldalon található tartalmakra a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.5/hu/">Creative Commons Nevezd meg!-Ne add el!-Így add tovább! 2.5 Magyarország License</a> vonatkozik.

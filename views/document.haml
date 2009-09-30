@@ -1,0 +1,48 @@
+%h1= @document.title
+#document= @document.body
+%p.legal= "#{@document.author}, #{@document.created_at.strftime("%Y.%b.%d")}"
+%a{:name=>"comments"}
+#post-comments
+  %h2 Mások így vélik
+  -if @document.comments.size.zero?
+    %h4 Még senki sem szólt hozzá.
+  - @document.comments.each do |comment|
+    .comment
+      =gravatar_tag(comment)
+      .data
+        .who
+          ="<strong>Ki</strong>: #{comment.name}"
+          - if /^http:\/\/.+/ === comment.website 
+            ="@ <a href='#{comment.website}'>#{comment.website}</a>"
+        .when="<strong>Mikor</strong>: #{comment.created_at.strftime("%Y.%m.%d.")}"
+      .body=comment.body
+%a{:name=>"add-comment"}
+#add-comment
+  %h2 Add hozzá a saját véleményed
+  %form.form{:action => comments_path(@document), :method=>'post'}
+    ="<div class='input #{'field-with-error' if @comment.errors.on(:name) }'>"
+    %label{:for=>'comment[name]'}Neved
+    %br
+    %input{:type=>'text', :name=>'comment[name]', :value=>@comment.email, :tabindex=>1}
+    -if @comment.errors.on(:name)
+      Egy nevet adj meg légyszives.
+    ="</div>"
+    .input
+      %label{:for=>'comment[email]'}E-mail címed (nem kötelező megadnod - ha mégis a <a href="http://en.gravatar.com/">Gravatar</a> logód jelenik meg helyette)
+      %br
+      %input{:type=>'text', :name=>'comment[email]', :value=>@comment.email, :tabindex=>2}
+
+    .input
+      %label{:for=>'comment[website]'}Weboldalad URL-je (ha van)
+      %br
+      %input{:type=>'text', :name=>'comment[website]', :value=>@comment.website || "http://", :tabindex=>3}
+      
+    ="<div class='input #{'field-with-error' if @comment.errors.on(:name) }'>"
+    %label{:for=>'comment[body]'}Hozzászólás 
+    -if @comment.errors.on(:body)
+      Üres üzenetet nem küldhetsz be.
+    %br
+    %textarea{:cols=>'50', :rows=>'10', :name=>'comment[body]', :tabindex=>4}=@comment.body
+    ="</div>"
+    %input{:type=>'submit', :value=>'Beküld'}
+    

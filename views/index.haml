@@ -1,0 +1,31 @@
+#posts-column
+  %h2 Szösszenetek, gondolatok
+  .column-description
+    %p Mindennapi gondolatok, érdekes olvasni és látnivalók - azt hiszem ezt blognak hívják.
+  - @posts.each do |post|
+    %h3.post-title
+      = post.title
+      \/
+      %span.post-date= post.created_at.to_format("%Y. %B %d.")
+      \/
+      - if post.comments.size.zero?
+        = link_to "Hozzászólok", post_path(post) + "#add-comment"
+      - else
+        = link_to "#{post.comments.size} komment", post_path(post) + "#comments"
+    .post-body= post.body
+
+#articles-column
+  %h2 Mélyebb cikkek, írások
+  .column-description
+    %p Hosszabb lélegzetvételű, technikai leírások főként webprogramozásról és fejlesztésről, főként Rubyban, azoknak akik szeretnek elmélyülni egy-egy témában.
+  - @articles.each do |article|
+    .article
+      .image
+        %img{:src=>article_image_path(article)}
+      %h3
+        = link_to article.title, article_path(article)
+      %p.post-date= article.created_at.to_format("%Y. %B %d.")
+      
+%p
+  %img{:src=>"/images/rss.gif", :style=>"vertical-align:middle"}
+    %a{:href=>rss_url, :rel=>"alternate", :type=>"application/rss+xml"} Bejegyzések és cikkek RSS-e.

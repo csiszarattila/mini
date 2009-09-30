@@ -8,4 +8,8 @@ describe 'Models' do
   it "should have Post" do
     lambda{ Post }.should_not raise_error
   end
+  
+  it "should have Comment" do
+    lambda{ Comment }.should_not raise_error
+  end
 end
