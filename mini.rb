@@ -184,8 +184,7 @@ end
 		end
 
 		@comment = Comment.new(params[:comment])
-		@comment.document = @document.filename
-		if @comment.save
+    if @document.add_comment( @comment )
 			redirect document_url
 		else
 			haml :document
