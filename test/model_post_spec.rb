@@ -6,9 +6,7 @@ describe 'Post' do
   it "should have comments" do
     post = Post.all.first
     
-    comment = @valid_comment
-    comment.document = post.filename
-    comment.save
+    post.add_comment @valid_comment
     
     post.comments.should have(1).item
   end
