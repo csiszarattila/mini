@@ -8,7 +8,8 @@ Spec::Runner.configure do |config|
     @sample_post_name_without_extension = "sample_post"    
   end
   
-  config.before(:each) do 
+  config.before(:each) do
+    # Use transactions to rollback db after each test case
     ActiveRecord::Base.connection.increment_open_transactions
     ActiveRecord::Base.connection.begin_db_transaction
     
@@ -22,7 +23,8 @@ Spec::Runner.configure do |config|
   end
   
   config.after(:each) do
-      ActiveRecord::Base.connection.rollback_db_transaction
+    # Rollback db to original state after each test case
+    ActiveRecord::Base.connection.rollback_db_transaction
   end
 end
 
