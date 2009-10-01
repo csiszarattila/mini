@@ -71,6 +71,6 @@ describe 'Mini' do
     last_request.url.should match( '/bejegyzesek/sample-post/comments' )
     
     post = Post.find("sample_post")
-    post.comments.should have(1).item
+    post.comments.should have(:no).item
   end
 end

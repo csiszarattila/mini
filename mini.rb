@@ -184,7 +184,7 @@ end
 		end
 
 		@comment = Comment.new(params[:comment])
-		@comment.post_id = @document.object_id
+		@comment.document = @document.filename
 		if @comment.save
 			redirect document_url
 		else

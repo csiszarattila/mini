@@ -5,11 +5,11 @@ ActiveRecord::Base.establish_connection(
 	:dbfile	=>	'db/mini.test.sqlite3.db'
 )
 
-ActiveRecord::Schema.define(:version=>1) do
+ActiveRecord::Schema.define(:version=>2) do
 	create_table :comments do |t|
 		t.string :name, :email, :website
 		t.text :body
 		t.datetime :created_at
-		t.integer :post_id
+		t.string :document
 	end
 end
