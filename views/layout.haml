@@ -26,4 +26,33 @@
     #body
       = yield
     #legal-notes
-      &copy;2008-2009 Csiszár Attila <br/> Az oldalon található tartalmakra a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.5/hu/">Creative Commons Nevezd meg!-Ne add el!-Így add tovább! 2.5 Magyarország License</a> vonatkozik.
+      %p
+        %img{:src=>"/images/rss.gif", :style=>"vertical-align:middle"}
+        %a{:href=>rss_url, :rel=>"alternate", :type=>"application/rss+xml"} Bejegyzések és cikkek RSS-e.
+      #about-me
+        %h4 A szerzőről
+        %img{:src=>"/images/portre.jpg"}
+        %p
+          A Rubysztán blog
+          %a{:href=>"http://csiszarattila.com/rolam"}Csiszár Attila
+          agyszüleménye, aki a mindennapokban PHP fejlesztőként tevékenykedik.
+          A Ruby nyelvvel közel egy éve került közelebbi kapcsolatba, amikor is úgy döntött
+          %a{:href=>"http://szakdolgozat.csiszarattila.com"}szakdolgozatát ebből publikálja.
+          A nyelv rögtön elvarázsolta, és azóta amikor szabadidejében számítógép elé ül csak ezzel szeret foglalkozni.
+          A mindeközben szerzett élményeiből és tapasztalataból próbál meg valamennyit visszaadni a Rubysztán blog.
+      #contact
+        %h4 Kontakt
+        %p
+          Amennyiben bármilyen kérdésed lenne fordulj hozzám bizalommal, az
+          %a{:href=>"http://csiszarattila.com/kapcsolat"}elérhetőségeimet itt találod.      
+      #blog-engine
+        %h4 Powered by Mini
+        %p
+          Az oldalt egy saját fejlesztésű blogmotor, a Mini szolgálja ki, amely Ruby nyelven,
+          %a{:href=>"http://www.sinatrarb.com/"}Sinatra keretrendszerben,
+          az ActiveDocument felhasználásával íródott.
+      #legal
+        %h4 Szerzői Jogok
+        %p &copy;2008-2009 Csiszár Attila <br/> Az oldalon található tartalmakra a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.5/hu/">Creative Commons Nevezd meg!-Ne add el!-Így add tovább! 2.5 Magyarország License</a> vonatkozik.
+        %p Azaz semmiben sem korlátozlak az itt található tartalmak felhasználásában és továbbközlésében, amennyiben a megfelelő módon feltüntetsz, mint szerzőt.
+

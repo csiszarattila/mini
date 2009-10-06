@@ -1,0 +1,316 @@
+/*
+Some elements shamelessly stolen from Sinatra
+http://sinatra.rubyforge.org/sinatra.css
+*/
+body{ color: #222;
+    background: #fafafa;
+    font-family: Helvetica, Arial, sans-serif;
+    margin: 0px;
+    /*margin: auto 8em;*/
+    padding: 0;
+}
+
+a {
+	color: #1177DD;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a img
+  { border: none; }
+
+#content{
+  background: #fff;
+  padding: 1em 2em;
+  min-width: 48em;
+  margin: auto 2em;
+  border: 1px solid #ccc;
+  border-top: none; 
+  border-bottom: none;
+}
+
+/*-----------
+ index view
+------------*/
+#content #posts-column{
+  float: left;
+  width: 45%;
+  margin-right: 5%;
+}
+
+#content #posts-column h2, 
+#content #articles-column h2{
+  border-top: none;
+  border-bottom: 4px solid #e0e0e0;
+  margin-top: 0px;
+}
+
+#content #articles-column{
+  overflow: hidden;
+}
+
+#content #articles-column h3{
+  font-size: 140%;
+}
+
+#content .column-description{
+  font-family: Georgia, 'Times New Roman', Arial, sans-serif;
+  font-size: 110%;
+  min-height: 4em;
+}
+
+#content .article{
+  min-height: 50px;
+  margin-bottom:1em;
+  clear:left;
+}
+
+#content .article .image{
+  margin-right: 20px;
+  width: 70px;
+  height: 80px;
+  float: left;
+}
+
+#content .article img{
+  float:right;
+}
+
+#content .article h3{
+  text-align:left;
+}
+
+#content .article .post-date{
+  margin:0px;
+  font-weight:bold;
+}
+
+#content .inner {
+  position: relative;
+  border-top: 4px solid #222;
+  margin-top: 0.2em; 
+}
+
+#content h1, #content h2, #content h3, #content h4, #content h5, #content h6 {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; 
+}
+
+body #content h1:first-child {
+  color: #222;
+  background: #fff;
+  font: bold 300% Georgia, "Times New Roman", serif;
+  text-align:center; 
+}
+
+#content h1 a {
+  color: #222;
+}
+
+#content h2 {
+  color: #333;
+  font-size: 150%;
+  margin-top: 1.5em;
+  border-top: 4px solid #e0e0e0;
+  padding-top: .5em;
+}
+
+#content h3 {
+	font-weight: bold;
+	font-size: 120%;
+	color: #4e4e4e;
+	margin: 1em 0 .2em; }
+	
+#content .legal{
+  text-align:right;
+  font: bold 110% Georgia, "Times New Roman", serif;
+}
+
+/*------------
+ navigation
+------------*/
+#content #navigation{
+  border-bottom: 4px solid #e0e0e0;
+  font-size:200%;
+  font-weight:bold;
+}
+
+#content #navigation a{
+  color:#000;
+}
+
+#content #navigation a:hover{
+  color:#1177DD;
+  text-decoration:none;
+}
+
+/*-----------------
+ posts on main
+-----------------*/
+#content #posts h2{
+  border:none;
+  margin:0px;
+} 
+
+#content .post-date{
+  color:#bbb;
+  font-size:80%;
+}
+
+/*-----------------------
+ documents in full view
+-----------------------*/
+
+#content #document a{
+  background:#ffa;
+  color:#00A;
+  border-bottom:1px dotted #000;
+}
+
+#content #document a:hover{
+  background:#ffa;
+  color:#00A;
+  text-decoration:none;
+  border-bottom:1px solid #000;
+}
+
+/*--------
+ code 
+--------*/
+#content code, #content pre, #content textarea {
+	font-family: "Deja Vu Sans Mono", "Bitstream Vera Sans Mono", "Inconsolata", "Consolas", monospace; }
+#content pre {
+	margin: .5em 0;
+	padding: .5em; }
+#content pre {
+  margin: 1em 0;
+  font-size: 90%;
+  background-color: #f8f8ff;
+  border: 1px solid #dedede;
+  padding: .5em;
+  line-height: 1.5em;
+  color: #444; }
+
+#content pre code {
+  padding: 0;
+  font-size: 100%;
+  background-color: #f8f8ff;
+  border: none; }
+
+#content code {
+  font-size: 90%;
+  background-color: #f8f8ff;
+  color: #444;
+  padding: 0 .2em;
+  border: 1px solid #dedede; }
+
+#content pre{
+	overflow: auto;
+}
+
+#content .signal{
+	background:#222;
+	color:#fff;
+	padding:0.1em 0.4em;
+}
+
+#content .img{
+  width:800px;
+  margin:0px auto;
+  text-align: center;
+}
+
+#content .img p{
+  margin: 1em;
+  font-family:Georgia,sans-serif;
+}
+
+/*----------
+ comments
+----------*/
+#post-comments .comment{
+ padding:0.8em;
+}
+
+#post-comments .comment .gravatar{
+ float:left;
+ margin-right:.5em;
+ margin-bottom:.5em;
+}
+
+#post-comments .comment .data{
+  margin-top:5px;
+}
+
+#post-comments .comment .body{
+ clear:left;
+ border-bottom:2px solid #ccc;
+}
+  
+form .input,
+form .submit input{
+ margin-top:1em;
+}
+
+form .input label{
+ margin-right:1em;
+ padding:0.2em;
+ color:#000;
+ font-weight:bold;
+}
+
+form .input input,
+form .input textarea{
+ border:2px solid #bbb;
+ font-size:1.2em;
+ margin:0px;
+}
+
+form .error-messages p{
+ margin:10px 1em;
+ font-weight:bold;
+}
+
+form .field-with-error label{
+ background:#c00;
+ color:#fff;
+}
+
+form .field-with-error input,
+form .field-with-error textarea{
+ border-color:#c00;
+}
+
+/*---------------
+ Legal notes
+-----------------*/
+
+#legal-notes {
+  border-top: 4px solid #e0e0e0;
+  margin-top: 5em;
+  padding-top: 1em;
+  color: #bbb;
+  font-family: Georgia, sans-serif;
+  font-size: 0.8em;
+  clear: left;
+  overflow: hidden;
+}
+
+#about-me img{
+ width: 60px;
+ height: 50px;
+ float: left;
+ margin-right: 1em;
+}
+
+#legal-notes div {
+ width: 19em;
+ padding: 0em 1em;
+ float: left;
+}
+
+#legal-notes #about-me {
+ padding-left: 0em;
+}
