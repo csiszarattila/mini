@@ -37,7 +37,7 @@ a img
 ------------*/
 #content #posts-column{
   float: left;
-  width: 45%;
+  width: 55%;
   margin-right: 5%;
 }
 
@@ -152,13 +152,21 @@ body #content h1:first-child {
 #content #posts h2{
   border:none;
   margin:0px;
-} 
-
-#content .post-date{
-  color:#bbb;
-  font-size:80%;
 }
 
+#content #posts-column .post-title{
+ font-size: 1.8em;
+ font-weight: bold;
+}
+
+#content .post-date{
+  color:#000;
+  font-weight: bold;
+}
+
+#content .post-date span{
+  color:#bbb;
+}
 /*-----------------------
  documents in full view
 -----------------------*/

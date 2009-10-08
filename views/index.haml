@@ -5,13 +5,16 @@
   - @posts.each do |post|
     %h3.post-title
       = post.title
-      \/
-      %span.post-date= post.created_at.to_format("%Y. %B %d.")
+    .post-date
+    \/
+      %span
+        = post.created_at.to_format("%Y. %B %d.")
       \/
       - if post.comments.size.zero?
         = link_to "Hozzászólok", post_path(post) + "#add-comment"
       - else
         = link_to "#{post.comments.size} komment", post_path(post) + "#comments"
+      \/
     .post-body= post.body
 
 #articles-column
