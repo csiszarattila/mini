@@ -85,6 +85,7 @@ a img
 
 #content .article .post-date{
   margin:0px;
+  color: #bbb;
   font-weight:bold;
 }
 
@@ -155,7 +156,7 @@ body #content h1:first-child {
 }
 
 #content #posts-column .post-title{
- font-size: 1.8em;
+ font-size: 2em;
  font-weight: bold;
 }
 

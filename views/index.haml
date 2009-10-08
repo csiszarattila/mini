@@ -1,7 +1,4 @@
 #posts-column
-  %h2 Szösszenetek, gondolatok
-  .column-description
-    %p Mindennapi gondolatok, érdekes olvasni és látnivalók - azt hiszem ezt blognak hívják.
   - @posts.each do |post|
     %h3.post-title
       = post.title
@@ -20,7 +17,7 @@
 #articles-column
   %h2 Mélyebb cikkek, írások
   .column-description
-    %p Hosszabb lélegzetvételű, technikai leírások főként webprogramozásról és fejlesztésről, főként Rubyban, azoknak akik szeretnek elmélyülni egy-egy témában.
+    %p Hosszabb lélegzetvételű leírások főként webfejlesztésről, és főként Rubyban, azoknak akik szeretnek elmélyülni egy-egy témában.
   - @articles.each do |article|
     .article
       .image
