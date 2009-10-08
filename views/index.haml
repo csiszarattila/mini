@@ -2,7 +2,7 @@
   - @posts.each do |post|
     %h3.post-title
       = post.title
-    .post-date
+    .date-div.post-date
       \/
       %span
         = post.created_at.to_format("%Y. %B %d.")
@@ -19,13 +19,14 @@
   .column-description
     %p Hosszabb lélegzetvételű leírások főként webfejlesztésről, és főként Rubyban, azoknak akik szeretnek elmélyülni egy-egy témában.
   - @articles.each do |article|
-    .article
-      .image
-        %img{:src=>article_image_path(article)}
-      %h3
-        = link_to article.title, article_path(article)
-      %p.post-date= article.created_at.to_format("%Y. %B %d.")
-      
+      .article
+        .image
+          %img{:src=>article_image_path(article)}
+        .head
+          %h3.article-title
+            = link_to article.title, article_path(article)
+          %p.date-div.article-date= article.created_at.to_format("%Y. %B %d.")
+
 %p
   %img{:src=>"/images/rss.gif", :style=>"vertical-align:middle"}
     %a{:href=>rss_url, :rel=>"alternate", :type=>"application/rss+xml"} Bejegyzések és cikkek RSS-e.

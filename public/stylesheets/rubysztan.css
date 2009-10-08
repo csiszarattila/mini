@@ -37,8 +37,9 @@ a img
 ------------*/
 #content #posts-column{
   float: left;
-  width: 55%;
+  width: 50%;
   margin-right: 5%;
+  padding-right: 5%;
 }
 
 #content #posts-column h2, 
@@ -52,41 +53,10 @@ a img
   overflow: hidden;
 }
 
-#content #articles-column h3{
-  font-size: 140%;
-}
-
 #content .column-description{
   font-family: Georgia, 'Times New Roman', Arial, sans-serif;
   font-size: 110%;
   min-height: 4em;
-}
-
-#content .article{
-  min-height: 50px;
-  margin-bottom:1em;
-  clear:left;
-}
-
-#content .article .image{
-  margin-right: 20px;
-  width: 70px;
-  height: 80px;
-  float: left;
-}
-
-#content .article img{
-  float:right;
-}
-
-#content .article h3{
-  text-align:left;
-}
-
-#content .article .post-date{
-  margin:0px;
-  color: #bbb;
-  font-weight:bold;
 }
 
 #content .inner {
@@ -150,24 +120,88 @@ body #content h1:first-child {
 /*-----------------
  posts on main
 -----------------*/
-#content #posts h2{
-  border:none;
-  margin:0px;
-}
 
 #content #posts-column .post-title{
  font-size: 2em;
  font-weight: bold;
+ border-top: 4px solid #e0e0e0;
 }
 
-#content .post-date{
+#content .date-div{
   color:#000;
   font-weight: bold;
+  margin-bottom: 1em;
 }
 
-#content .post-date span{
+#content .date-div span{
   color:#bbb;
 }
+
+#content #posts-column .date-div a{
+  padding:0.2em 0em 0em;
+  color: #11AADD;
+}
+
+#content #posts-column .post-body{
+  font: normal 1.1em/1.6em Georgia, sans-serif;
+}
+
+#content #posts-column .post-body p:first-letter{
+  padding-left: 1em;
+}
+
+#content #posts-column a{
+   font-size: 1.1em;
+   font-weight: bold;
+}
+
+#content #posts-column a:hover,
+#content #articles-column a:hover{
+   color: #fff;
+   background-color: #1177DD;
+   text-decoration: none;
+}
+
+/*-----------------
+ articles on main
+-----------------*/
+
+#content #articles-column .article:hover {
+ background-color: #1177DD;
+}
+
+#content .article-title {
+  padding:0px;
+  margin:0px;
+}
+
+#content #articles-column .article-date {
+ color:#bbb;
+}
+
+#content .article {
+  padding: 1em 1em 0em;
+  border-bottom: 4px solid #e0e0e0;
+  clear:left;
+  overflow:hidden;
+}
+
+#content .article .image {
+  margin-right: 20px;
+  width: 70px;
+  height: 80px;
+  float: left;
+}
+
+#content .article .head {
+  float: left;
+  width: 18em;
+}
+
+#content .article img {
+  float:right;
+}
+
 /*-----------------------
  documents in full view
 -----------------------*/
@@ -302,7 +336,7 @@ form .field-with-error textarea{
   padding-top: 1em;
   color: #bbb;
   font-family: Georgia, sans-serif;
-  font-size: 0.8em;
+  font-size: 1em;
   clear: left;
   overflow: hidden;
 }
@@ -315,7 +349,7 @@ form .field-with-error textarea{
 }
 
 #legal-notes div {
- width: 19em;
+ width: 15em;
  padding: 0em 1em;
  float: left;
 }
