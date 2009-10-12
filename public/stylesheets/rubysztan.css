@@ -300,7 +300,7 @@ body #content h1:first-child {
 }
   
 form .input,
-form .submit input{
+form .submit {
  margin-top:1em;
 }
 
