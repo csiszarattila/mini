@@ -19,13 +19,12 @@
   .column-description
     %p Hosszabb lélegzetvételű leírások főként webfejlesztésről, és főként Rubyban, azoknak akik szeretnek elmélyülni egy-egy témában.
   - @articles.each do |article|
-      .article
-        .image
-          %img{:src=>article_image_path(article)}
-        .head
-          %h3.article-title
-            = link_to article.title, article_path(article)
-          %p.date-div.article-date= article.created_at.to_format("%Y. %B %d.")
+    %a.article{:href=>article_path(article)}
+      .image
+        %img{:src=>article_image_path(article)}
+      .head
+        %h3.article-title= article.title
+        %p.date-div.article-date= article.created_at.to_format("%Y. %B %d.")
 
 %p
   %img{:src=>"/images/rss.gif", :style=>"vertical-align:middle"}

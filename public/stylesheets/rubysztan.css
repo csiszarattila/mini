@@ -166,17 +166,8 @@ body #content h1:first-child {
  articles on main
 -----------------*/
 
-#content #articles-column .article:hover {
- background-color: #1177DD;
-}
-
-#content .article-title {
-  padding:0px;
-  margin:0px;
-}
-
-#content #articles-column .article-date {
- color:#bbb;
+#content a.article {
+  display:block;
 }
 
 #content .article {
@@ -184,6 +175,22 @@ body #content h1:first-child {
   border-bottom: 4px solid #e0e0e0;
   clear:left;
   overflow:hidden;
+}
+
+#content .article:hover {
+ background-color: #1177DD;
+}
+
+#content .article:hover .article-title {
+ color: #fff;
+}
+
+#content .article-title {
+  margin:0px;
+}
+
+#content .article-date {
+ color:#bbb;
 }
 
 #content .article .image {
