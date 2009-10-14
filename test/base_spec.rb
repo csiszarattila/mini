@@ -73,4 +73,15 @@ describe 'Mini' do
     post = Post.find("sample_post")
     post.comments.should have(:no).item
   end
+  
+  it "should not save if Honeypot captcha's value are set" do
+    @a_comment_to_post["comment[filter]"] = "abc";
+    post '/bejegyzesek/sample-post/comments', @a_comment_to_post
+
+    size_before_comment_posted = Post.find('sample_post').comments.size()
+    last_request.url.should match( SITE_URL + '/bejegyzesek/sample-post' )
+    last_response.should be_ok
+    
+    Article.comments.size.should be_equal(size_before_comment_posted)
+  end
 end

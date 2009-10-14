@@ -50,6 +50,9 @@
         Üres üzenetet nem küldhetsz be!
       %br
       %textarea{:cols=>'50', :rows=>'10', :name=>'comment[body]', :tabindex=>4}=@comment.body
-      
+    
+    %div.input
+      %label{:for=>'comment[filter]'}Ezt a mezőt hagyd üresen! Csak a robot spammerek kivédésére használjuk.
+      %input{:type=>'text', :name=>'comment[filter]', :value=>""}
     %input.submit{:type=>'submit', :value=>'Beküld'}
     
