@@ -16,6 +16,12 @@ module Rack
   end
 end
 
+class SimpleHelloWorld
+  def call(env)
+    [ 200, { "Content-Type" => "text/html"}, "Hello World, I'm a Rackable application.\n" + "My env is:\n" + env.map{ |k,v| "#{k}:#{v}" }.join("<br/>")]
+  end
+end
+
 load 'mini.rb'
 
 builder = Rack::Builder.new do
