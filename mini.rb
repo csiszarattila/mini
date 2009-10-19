@@ -14,8 +14,8 @@ require File.dirname(__FILE__) + '/models/post'
 # 
 # Sinatra alkalmazás
 # 
-	
-set :environment, :command_line
+class Mini < Sinatra::Application
+set :environment, :development
 
 set :views, File.dirname(__FILE__) + '/views'
 
@@ -25,8 +25,8 @@ configure :test do
 end
 
 configure :development do
-	SITE_URL = "http://local.csiszarattila.com/rubysztan"
-	DB_FILE = "mini.sqlite3.db"
+	SITE_URL = "http://local.csiszarattila.com/rubysztan_mini"
+	DB_FILE = "mini.test.sqlite3.db"
 	require 'haml'
 end
 
@@ -50,7 +50,8 @@ ActiveRecord::Base.establish_connection(
 )
 
 before do
-	request.path_info = request.path_info.gsub(/^\/rubysztan/,"")
+	request.path_info = request.path_info.gsub(/^\/rubysztan_mini/,"")
+	@site_url = SITE_URL
 end
 
 helpers do
@@ -105,9 +106,9 @@ helpers do
 end
 
 get '/' do
-	@posts = Post.all.sort {|p, obj| obj.created_at <=> p.created_at }
-	@articles = Article.all.sort {|p, obj| obj.created_at <=> p.created_at }
-	haml :index
+  @posts = Post.all.sort {|p, obj| obj.created_at <=> p.created_at }
+   @articles = Article.all.sort {|p, obj| obj.created_at <=> p.created_at }
+   haml :index
 end
 
 get '/cikkek/rss' do
@@ -185,4 +186,6 @@ post '/:document_type/:title/comments' do
 	else
 		haml :document
 	end
+end
+
 end
