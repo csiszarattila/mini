@@ -1,0 +1,33 @@
+---
+id: 8
+title: Rails debug tipp - rails-footnotes plugin 
+author: Csiszár Attila
+image_path: rails_logo.jpg
+created_at: 2009-01-09
+---
+%p Ha még nem hallottál volna a <a href="http://github.com/josevalim/rails-footnotes/wikis">rails-footnotes plugin</a>ról, mindenképp próbáld ki! Feltelepítése után minden oldalhoz hozzáad egy navigációs elemet, amelyről könnyedén elérheted a munkamenetek, sütik, környezeti változók tartalmát:
+
+.img
+  %img{:src=>"http:/csiszarattila.com/rubysztan/images/rails-footnotes-plugin.tiff"} 
+  %p A rails-footnotes plugin bevetés közben
+
+%p Sőt meg is nyithatod a meghívott vezérlőt, nézetet vagy a letöltött css stíluslapok tartalmát a beállított szövegszerkesztődben - alapértelmezettként a <a href="http://macromates.com/">Textmate</a>-el van integrálva. Ez utóbbi funkció elérhető akkor is, ha kivételt dob az alkalmazásunk - így egy kattintással elérhetjük a kivételt produkáló kódsort.
+
+%h2 Telepítés
+%p Igazából a plugin dokumentációja minden lényeges pontra kitér, de azért:
+
+%p Ha még nem telepítettünk volna gem-et korábban a GitHub-ról, adjuk hozzá a listánkhoz:
+%pre gem sources -a http://gems.github.com
+
+%em Innentől kezdve, ha egy gemre keresünk a GitHubosokat is kilistázza - a gemek többsége pedig ma már innen érhető el.
+
+%p Telepítsük a gemet a szokásos módon:
+%pre sudo gem install josevalim-rails-footnotes
+
+%p Majd adjuk hozzá az alkalmazásunk fejlesztői környezetéhez. Mivel nyilván nem lenne célszerű éles környezetben is használni ezért a <strong>config/environments/development.rb</strong> fájlban definiáljuk, mint gem függőséget:
+
+%pre
+  config.gem "josevalim-rails-footnotes",  :lib => "rails-footnotes", :source => "http://gems.github.com"
+
+%p A gem elég jó API-val rendelkezik így akár egyedi tartalmakat is hozzáadhatunk a fülekhez.
+

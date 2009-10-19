@@ -1,0 +1,61 @@
+---
+id: 4
+title: MySQL Gem telepítése OSX 10.4.11(Tiger) alá 
+author: Csiszár Attila
+image_path: mysql_logo.gif
+created_at: 2008-11-02
+---
+%p Mi tegyünk ha a Rails(2.1) logjában ilyen üzenetekkel találkozunk:
+
+%pre DEPRECATION WARNING: You're using the Ruby-based MySQL library that ships with Rails. This library will be REMOVED FROM RAILS 2.2. Please switch to the offical mysql gem: `gem install mysql`  See http://www.rubyonrails.org/deprecation for details. (called from mysql_connection at /usr/local/lib/ruby/gems/1.8/gems/activerecord-2.1.1/lib/active_record/connection_adapters/mysql_adapter.rb:81)
+
+%p A MySQL adatbáziskezelő pedig már nem is használható a Rails 2.2-es verziójától a MySQL Gem megléte nélkül.
+
+%p A Ruby ugyanis bár rendelkezik a maga kis mysql lib-implementációjával, csakhogy a MySQL-es fiúk sem pihentek és kiadták a saját verziójukat, ami jóval gyorsabb. A Rails tehát szeretné ezt használni.
+
+%h2 Telepítés Gemként
+
+%pre sudo gem install mysql
+
+%p De a gem csak nem fordul mivel explicit meg kell adnunk a mysql-dev fájlok - C header fájlok - helyét. Próbálkozzunk a mysql helyének a megadásával:
+
+%pre sudo gem install mysql -- --with-mysql-dir=/usr/local/mysql
+
+%p Csak nem jó, bővebben:
+
+%pre sudo gem install mysql -- --with-mysql-config=/usr/local/mysql/bin/mysql_config
+
+%p Majdnem, csak ekkor a fordítás elszáll ezzel:
+
+%pre 
+  :preserve
+    mysql.c: In function 'Init_mysql':
+    mysql.c:2015: error: 'ulong' undeclared (first use in this function)
+
+%p De úgy tűnik nem vagyunk ezzel egyedül, mivel <a href="http://blog.maxdunn.com/articles/2006/12/12/installing-mysql-gem-on-mac-os-x-10-4">itt olvashatunk egy lehetséges megoldást</a>. A probléma <a href="http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-talk/249986">részletesen.</a>
+
+Próbáljuk meg magunk fordítani, azzal, hogy előbb lépjünk be a <strong>usr/local/lib/ruby/gems/1.8/gems/mysql-2.7/</strong> könyvtárba, majd adjuk hozzá a következő sort a <strong>mysql.c</strong> fájlhoz:
+
+%pre #define ulong unsigned long
+
+%p Majd fordítsuk manuálisan:
+
+%pre
+  :preserve
+    sudo ruby ./exconf.rb --with-mysql-config=/usr/local/mysql/bin/mysql_config
+    sudo make
+
+%p
+  %em Tesztelés: Nos, mint azt az elsőként linkelt bejegyzés írója is írja, nem fut le a ./test.rb. Rossz felhasználóval akar csatlakozni. A fájlokat vizsgálva kiderül, hogy nem veszi át a paramétereket. Manuálisan beillesztve a paraméteket(host,user,pass) működik, csak pár teszt hasal el; long, meg bináris konverziókon, gondolom ez architektúrális probléma, ettől még mennie kell...
+
+%p Telepítés:
+%pre sudo make install
+
+%p Ha a Rails és a Ruby tovább panaszkodna, hogy nem találja a gem-et próbáljuk meg a következőt:
+%pre /usr/bin/install -c -m 0755 mysql.bundle /usr/local/lib/ruby/site_ruby/1.8/i686-darwin8.11.1
+
+%p Ellenőrzés:
+%pre
+  :preserve
+    irb
+    irb(main):001:0>require 'mysql' => true

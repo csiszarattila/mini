@@ -1,0 +1,33 @@
+---
+id: 3
+author: Csiszár Attila
+title: Ruby frissítése OSX 10.4(Tiger) alatt
+image_path: ruby_logo.png
+created_at: 2008-10-26
+---
+%p A Mac OSX rendszerek - legjobb tudomásom szerint - a 10.3-as verzió óta előtelepítve tartalmazzák a Ruby interpretert. Az OSX 10.4 (Tiger) mindenképp, ugyanakkor ez csak(?) a Ruby 1.8.4-es verzióját jelenti. A következő leírás épp ezért a legfrisebb verziókra való frissítésben segít.
+%p 
+  %em A Ruby interpreter Matz - a Ruby nyelv megalkotója - féle változata (MRI - Matz Ruby Interpreter) jelenleg két fő verziót tartalmaz: az 1.8.6-ost és az 1.8.7-est. A számozás itt kissé félrevezető lehet, mivel a két fő verzió két fő irányt jelent, például utóbbi jelentős változtatásokat tartalmaz és az alatta írt kódok nem feltétlenül kompatibilisek a 1.8.6-os verzióval. Épp ezért, ha nincsenek még korábbi Ruby verziók alatt írt programjaink én az 1.8.7-es verzió, ellenkező esetben az 1.8.6-os verziót ájánlom.
+
+%h2 Parancssori telepítés
+
+%p Töltsük le az 1.8.7 patchlevel 22-es verziót (A cikk írásának időpontjában ez számít a legfrissebb kiadásnak, amely több biztonsági hiba javítását is tartalmazza az alap 1.8.7-es verzióhoz képest)
+
+Majd csomagoljuk ki parancssorban:
+%pre
+  :preserve
+    tar -xf ruby-1.8.7-p22 
+    cd ruby-1.8.7-p22 
+%pre ./configure --with-readline-lib=/usr/local/lib --enable-pthread
+%p A <em>--with-readline-lib</em> kapcsoló megadása fontos, ha szeretnénk ékezetes karaktereket használni az <strong>irb</strong> alatt.
+%pre
+  :preserve
+    make
+    (make test)
+    sudo make install
+
+Ellenőrzés:
+%pre
+  :preserve
+    ruby -v
+    ruby 1.8.7 (2008-06-20 patchlevel 22) [i686-darwin8.11.1]

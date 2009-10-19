@@ -1,0 +1,12 @@
+---
+id: 11
+author: Csiszár Attila
+title: Metamorfozis
+created_at: 2009-03-07
+---
+
+%p Kisebb (inkább nagyobb) átalakuláson esett át a Rubysztán blog. A korábbi hosszabb lélegzetvételű leírások mellett helyet szerettem volna szorítani a rövidebb, nemcsak a Rubyt és programozást érintő téáknak is - ezekre a régi struktúrában és formában nem volt igazán lehetőség. Egy különálló blog létrehozását nem tartottam ésszerűnek: a tartalmak frissítése, megosztása és követése túl bonyolult lett volna számomra és számotokra is. Úgyhogy ezentúl kibővített tartalommal jelentkezik a Rubysztán blog!
+
+%p A tartalmi változtatás a nyitóoldal strukturáját is érintette: a rövidebb bejegyzéseket baloldalt, teljes hosszukban olvashatjátok, míg a korábbi és a jövőbeni hosszabb tartalmak, azaz cikkek listáját jobboldalt találjátok meg. Ezért kérem, akik (rss) hírolvasón keresztül követik a blogot is vessenek rá egy pillantást:). A hozzászólás lehetősége természetesen továbbra is megmaradt, sőt mindenkit arra buzdítok, hogy tegye meg!
+
+%p Ami az oldal <strong>technikai részét</strong> illeti: a blog alatt egy saját, <a href="http://www.sinatrarb.com">Sinatrára</a> épülő rendszer fut. A bejegyzések és cikkek adatbázis helyett szöveges fájlokban tárolódnak: a hozzájuk kapcsolódó fontosabb meta-információk (pl. létrehozási dátum) YAML formátumban a szöveg elején, maga a tartalom egyszerű Haml formátumban található meg. Így kényelmesen, egy kódeditorral, webes felület nélkül szerkeszthetem a szöveget. A kommentek ezzel szemben egy törpe SQLite adatbázisban kapnak helyet - ezeket egy ActiveRecord modellen keresztül kezelem, így nem kell az SQL lekérdezések összeállításával bajlódni. Ezenfelül írtam hozzá pár automatizmust - bejegyzések létrehozása, feltöltése az éles szerverre - végrehajtó Rake parancsot is.

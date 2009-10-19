@@ -1,0 +1,45 @@
+---
+id: 8
+author: Csiszár Attila
+title: Felhasználói-felületek HTML prototípusokkal
+created_at: 2009-01-19
+image_path: rails_logo.jpg
+---
+
+%p A következő bejegyzést két közelmúltban elolvasott bejegyzés ihlette. Először <a href=" http://www.rubyrailways.com/getting-real-with-balsamiq-amazing-mockups-in-a-breeze/">Szinek Péter blogjában mutatott be egy ötletes programot</a>amelyet nemcsak weboldalak, hanem bármilyen alkalmazás vázlatainak az elkészítéséhez is használhatjuk, majd a 37Signals féle Signal vs. Noise blogban <a href="http://www.37signals.com/svn/posts/1061-why-we-skip-photoshop">olvastam érveket a HTML+CSS alapú tervezésről szemben a grafikai (Photoshop) programokkal</a>, amely igen érdekes vitát szűlt a hozzászólásokban.
+
+%p Úgy gondoltam tehát, hogy megosztom a saját tapasztalataimat is. A szakdolgozatom elkészítése során alkalmaztam először a HTML alapú prototípizálást, amelyet nagyon megszerettem, remélhetőleg a következő bejegyzés felkelti mások érdeklődését is, és kedvet kapnak a technikához.
+
+%p Bár a fenti linkek alapvetőn csak az alkalmazás kinézetéről, az első elképzelések papírra vetéséről szólnak, komolyabb alkalmazásoknál szükségünk van összetettebb, a teljes működési folyamatokat bemutató vázlatokra, amelyek segítenek elképzelni az alapvető működést. Például egy webáruház esetében milyen nézeteket, válaszokat, reakciókat nyújtsunk, amikor egy felhasználó behelyez egy terméket a kosarába.
+
+%p Én a tervezés első szakaszában mindig felhasználói folyamatokban és a hozzájuk tartozó felületekben gondolkodom, amelyekhez egy-egy vázlatképet rendelek. Mindez segít elképzelni, hogyan áll majd össze a végső alkalmazás. Ebben a fázisban szeretek papíron dolgozni, mert sokkal gyorsabb és szórakoztatóbb bárminél - bár nem tartom grafikusi vénákkal megáldott embernek magam, de sok jó ötletet kapok rajzolás közben és az alkalmazás végső megjelenésének a formája is könnyebben kialakítható - számomra.
+
+%p Ugyanakkor mivel a vázlataim többségére nagyfokú absztrakció jellemző nehezen tudom átültetni őket a gyakorlatba - a papíron jónak tűnő ötlet végeredményben katasztrófálisan mutat. Ezt a problémát is sokat segített kompenzálni az előzetes HTML+CSS alapú megvalósítás, mivel a hirtelen jött ötleteket ki tudom próbálni valójukban nem a végső alkalmazást kell teljesen áttervezni.
+
+%p De igyekszem hangsúlyozni, hogy mindezek szerintem csak olyan webes alkalmazások - tehát komplexebb háttérrel rendelkezőek - esetében alkalmazható, ahol a működés legalább olyan fontos, mint a kinézet.
+
+%p Épp ezért azt gondolom a felhasználói felületek megtervezése nemcsak azt kell, hogy jelentse, hogy megtervezzük például, hogyan nézzen ki az webalkalmazásunk nyitóoldala, hanem sokkal inkább segítenie kell elképzelni az alkalmazás különböző működési folyamatait, segítenie kell a működés közben felmerülő feladatok és problémák előrevetítésében. A felhasználói felületek ilyen módon való megtervezésével olyan problémákat, feladatokat is felfedezhetünk, amelyek egyébként csak az implementálás - programozás - során bukkannának elő.
+
+%p A fentiek miatt a felhasználói felületek tervezését ezért érdemes egy komolyabb prototípus elkészítésével végezni. A web közege miatt ezt érdemes HTML nyelven elkészítenünk, amelyre könnyedén ráhúzhatjuk a végső dizájnunkat is CSS használatával.
+
+%h2 Hogyan működjön egy HTML prototípus?
+
+%p A példa kedvéért vegyük a szakdolgozatom példáját, ahol a webáruház prototípusa a következőképpen nézett ki: minden nézethez (vagy akcióhoz) egy-egy oldalt rendeltem, ahol a nézetek közötti átjárást a linkek biztosították, csakúgy, mint a végső alkalmazásban. A valós működést ugyanakkor csak szimuláltam: amikor egy felhasználó például elhelyez a kosarában egy terméket valamelyik link segítségével, akkor a következő nézetben úgy állítottam be, mintha már lenne termék a kosarában - valós adat nincs mögötte. Amikor kiválaszt egy kategóriát a következő nézetben egy fiktív kategória fiktív termékeit tekintheti meg – megint csak anélkül, hogy valós adatokat vennénk a háttérből, mondjuk egy adatbázis felhasználásával.
+
+%p Ugyanígy ha a felhasználó kitölt egy űrlapot, és az elküldésére kattint a következő nézetben azt szimuláltam, hogyan jelenjenek meg a hibás kitöltésből eredő hibaüzenetek, teljesen függetlenül attól, hogy milyen adatokat adott meg előzőleg.
+
+%p A fenti módszereket bármilyen alkalmazás esetén felhasználhatjuk, amivel egy igazán életszerű prototípust kaphatunk. Fontos azonban látnunk, hogy az alapvető tervezési folyamatokat nem úszhatjuk meg, anélkül nem érdemes elkezdenünk a prototípus elkészítését! Épp ezért mielőtt hozzálátnánk a prototípus elkészítéséhez előbb vázoljuk milyen funkciókat érhetnek el a felhasználók, majd készítsünk egy kezdetleges navigációs tervet: azaz vázoljuk, hogy a felhasználók milyen útvonalakon érhetik el majd a különböző funkciókat és milyen nézeteket kell majd megvalósítanunk.
+
+%h2 De mindez milyen előnyökkel jár?
+
+%p Először is az egyszerűsége. Ahelyett, hogy grafikai és felülettervező eszközök elsajátításával bajlódnánk HTML alapokon egyszerűen tudunk tervezni, ráadásul nem kerül semmibe, szemben egy komolyabb grafikai program árával. 
+
+%p Másodsorban, és ez fontosabb tény, a kipróbálhatóság. Mivel HTML alapon készül, az elkészült prototípus működés közben egy böngésző segítségével kipróbálható. Így a fejlesztőcsapat és maga a megrendelő is pontos képet kaphat a végső alkalmazásról még az implementálás előtt. A félreértések így korán kiküszöbölhetőek, a megjegyzések pedig pontosíthatják az elképzeléseket, amivel fejlesztési időt spórolunk meg, mert nem a végső alkalmazást kell átszabnunk új igények esetén.
+
+%p A harmadik szempont: a hatékonyság és újrafelhasználhatóság. A létrehozott prototípusok ugyanis gond nélkül felhasználhatóak lesznek a fejlesztés későbbi szakaszában, hiszen a HTML kódok beépíthetőek lesznek a végső alkalmazásunkba is, tehát a befektetett munka nem vész kárba, szemben a grafikai tervekkel.
+
+%h2 Mikor alkalmazzuk és mikor ne?
+
+%p Természetesen a fenti módszernek nyilvánvaló hátrányai is vannak, hiszen egy komplex grafikai megoldást használó oldalnál sokkal nehezebb és időigényesebb a HTML és CSS programozást megvalósítani. Ugyanakkor én azt mondom itt is érdemes - némi egyszerűsítés után - a teljes működést leprogramozni, így ismét csak egy kipróbálható verziót kapunk. Nyilvánvalóan a prototípus készítése is kétélű fegyver, a befektetett munka és a vele elért hozam határozza meg megéri-e ilyen szinten foglalkozni vele.
+
+%p A következő cikkben arra mutatok példát, hogy milyen módszerrel tudtam egyszerűbbé és ezzel együtt gyorsabbbá tenni a prototípus elkészítését - és ebben már a Ruby is szerepet kap.

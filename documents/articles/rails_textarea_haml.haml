@@ -1,0 +1,61 @@
+---
+id: 5
+title: Haml szövegbeviteli(textarea) mezőkben
+author: Csiszár Attila
+image_path: haml_logo.gif
+created_at: 2008-11-09
+---
+%p Nemsokkal az első Rails-es alkalmazáson megírása után elkezdtem használni a <a href="http://haml.hamptoncatlin.com/">Haml</a>-t, ami egy remek HTML templétező vagy sablon motor. Annak aki még nem ismerné, javaslom mindenképpen vessen rá egy pillantást.
+
+%p A blogmotorom írása közben ötlött fel a gondolat, mi lenne ha integrálnám a használatát a szövegbeviteli mezőkbe is, hiszen így sokkal egyszerűbb lenne formázott bevitelt előállítani. A Haml ugyanis nem rugaszkodik el teljesen a HTML nyelvtől, mint teszi azt sok sablon nyelv, másrészt nem igényel olyan összetett megoldást, mint például a TinyMCE.
+
+%p Maga a Haml alapú szöveg előállítása, elmentése, és megjelenítése nem igényel túl sok problémát, de mit tegyünk, ha valamilyen hibát vétünk a formázás közben, hiszen ekkor a Haml fordító kivételt küld.
+
+%h2 1.lépés: A kivételek elkapása
+%p Fordítsuk előnyükre és használjuk ki a Haml kivételkezelését: ellenőrizzük még elmentés előtt a bejegyzés szövegét megfelel-e a szabályoknak.
+
+%pre 
+  :preserve
+    def validate_haml_syntax
+      begin
+        Haml::Engine.new(read_attribute :body).render unless body.nil?<span class="signal">1</span>
+      rescue Haml::SyntaxError => e<span class="signal">2</span>
+        line = e.line.nil? ? 1 : e.line+1
+        errors.add(:body,"Haml error on line \#{line}: \#{e.message}")<span class="signal">3</span>
+      end
+    end
+    
+%p Elsőként egy új Haml objektumot hozunk létre, majd meghívjuk rá a render metódust<span class="signal">1</span>. Ami hiba esetén Haml::SyntaxError-t dob<span class="signal">2</span>, ezt próbáljuk meg lekezelni. Az átadott kivétel-objektum tartalmazza: a hiba üzenetét(message) illetve a hiba sorszámát(line). Ezt a kettőt hozzáadva a modellünk errors tömbjéhez két dolog következik be: egyrészt a Rails érzékeli, hogy hibás a modellünk és újrahívja az előző kontrollert (pl. update vagy create), megjelenítve a hiba üzenetet (error_messages helper).
+
+%h2 2.lépés: Validálás hozzáadása
+
+%p Egyszerűen meghívjuk a validate_haml_syntax() metódusunkat a modell validate() metódusában, amely automatikusan végrehajtódik a modell elmentése előtt.
+
+%pre
+  :preserve
+    def validate
+      validate_haml_syntax()
+    end
+
+%h2 3.lépés: A szöveg "fordítása" HTML-re
+
+%p Már csak egy dolgot kell megoldanunk, az adatbázisban Hamlként tárolt szöveg visszaalakítását Html-é, ami tulajdonképpen a Haml::Engine(text).render meghívását jelenti.
+
+%p Akár felülbíráhatnánk ezzel a modellünk body attribútumának olvasási metódusát - body() - így viszont a szerkesztési felületen is a Html szöveg jellene meg mentés után, mi viszont ragaszkodunk a Haml formázott szöveghez.
+
+%p Vagy hozzáadhatnánk akár egy to_html metódust a modellünkhöz, viszont mennyivel egyértelműbb lenne, ha x.to_html helyett x.body.to_html()-t használhatnánk.
+
+%p Ehhez két ismeretre van szükségünk. Először is minden Rails modell rendelkezik egy after_initialize() metódussal<span class="signal">1</span>, ami megoldja a initialize() metódus felülbírálási gondjait, másodszor a Ruby lehetővé teszi, hogy objektumokhoz egyed v. példány metódusokat rendeljünk!<span class="signal">2</span>
+
+%pre
+  :preserve
+    def after_initialize<span class="signal">1</span>
+      class << body 
+        def to_html<span class="signal">2</span>
+          Haml::Engine.new(self).render
+        end
+      end
+    end
+
+%p 
+  %em Hozzáadhattuk volna magát a metódust a String osztály megnyitásával is - a body elemünk String példány, ekkor azonban minden további String osztályú objektumunk is rendelkezne a metódussal, amit szeretnénk elkerülni.

@@ -1,0 +1,111 @@
+---
+id: 1
+title: Git fordítása OSX Tiger alatt (SVN modullal)
+author: Csiszár Attila
+image_path: git_logo.png
+created_at: 2008-10-12
+---
+%p Rendhagyó módon nem egy Rubys témájú bejegyzéssel nyitom meg az oldalt, de remélem elnézőek lesztek. Terveim szerint egyébként sem csak a kedvenc programozási nyelvünkről szólna ez a blog, időnként előfordulhat, hogy körüljárok egy hasonlóan érdekes témát. Ezúttal a <a href="http://git.or.cz/">Git verziókezelő</a> telepítésén a sor.
+
+%p Hogy a téma mennyire aktuális azt az mutatja, hogy az utóbbi időben egyre több Rubys projekt - többek között a Rails is - áttért a Git verziókezelőre és nem véletlenül. 
+
+%p (Ha időm engedi és ti is jónak látjátok írok majd egy Git gyorstalpalót, bár én magam sem régóta használom - egyébként nagy megelégedettséggel.)
+
+%p Az első probléma amit le kell küzdenünk, hogy feltelepítsük rendszerünkre a verziókezelőt. Mivel én a Mac OSX Tiger, 10.4-es verzióját használom és csak Leopárd(OSX 10.5) alá adtak ki előfordított csomagokat, parancsorból kellett telepítenem. Ráadásul szerettem volna a korábbi SVN-es projekteimet is importálni, amelyet csak némi hekkelés árán sikerült megoldani.
+
+%p A telepítés menete tehát elsősorban Mac OSX 10.4 - Tiger operációs rendszert használóknak készült, de szerintem bármilyen *nix alapú rendszerre megállja a helyét.
+
+%p (Természetesen telepíthetjük a Git-et <a href="http://www.finkproject.org/">Fink</a>-en vagy <a href="http://www.macports.org/">Macports</a>-on keresztül is, ez a bejegyzés viszont azoknak szól akik nem szeretik a csomagkezelőket, vagy csak az éppen aktuális forrást szeretnék használni).
+
+%h2 A telepítés menete
+
+%p Szerencsére nem sok függősége van a Git-nek, ezek többsége előtelepítve megtalálható az operációs rendszer mellett, talán csak az expat jelent kivételt ez alól. (A Git függőségeinek a többsége amúgy is csak a dokumentáció többféle formátumra alakítása miatt kell.)
+
+%p Tehát töltsük le a legfrissebb Git forráskódot - a bejegyzés írásakor ez a 1.5.5-nek felel meg, de a telepítés megállja a helyét a későbbi verziókra is -, majd a 'szokásos' telepítési forgatókönyvet követve:
+
+%pre
+  :preserve
+    ./git-1.5.5
+    ./configure --prefix=/usr/local/git-1.5.5
+    make
+    sudo make install
+
+%p Hozzunk létre egy szimbolikus linket a program könyvtárára, így egyszerűbben megadhatjuk az elérését parancssorból, új verziók telepítésekor pedig elég csak a linket módosítani:
+
+%pre
+  :preserve
+    ln -s /usr/local/git-1.5.5 /usr/local/git
+
+%p Ahhoz, hogy a Git parancsait ne kelljen ezen a hosszú útvonalon keresztül elérnünk, és kiadásukkor a héj megtalálja automatikusan őket, hozzá kell adnunk a PATH környezeti változóhoz a fent létrehozott hivatkozás <strong>bin</strong> könyvtárát:
+
+%pre
+  :preserve
+    export $PATH="$PATH:/usr/local/git/bin/"
+
+%p 
+  %em A fenti lépéssorozat a legtöbb program telepítésénél járható út, akinek tehát nem ismerős érdemes megtanulnia, később pedig utánajárnia, hogy miért is működik mindez úgy, ahogy.
+
+%h2 SVN repók importálása Git alá.
+
+%p Ha Subversionről akarunk átállni és szeretnénk a korábbi projekteinket használni Git alatt is, a <strong>git-svn</strong> parancsot kell használnuk.
+
+%p Nos én már az első használatakor problémába ütköztem, ugyanis az alábbi hibaüzenetet kaptam:
+
+%pre Can't locate SVN/Core.pm in @INC (@INC contains: ... )
+
+%p A git-svn ugyanis Perl nyelven íródott: az SVN Perl moduljára épül. Használatához ezért telepítenünk kell az SVN SWIG Perl modulját, amihez szükségünk lesz az SVN forráskódjára. Ha letöltöttük:
+
+%pre
+  :preserve
+    ./subversion_forraskod
+    make swig-pl
+    sudo make install-swig-pl
+
+%p A részletes utasításokat én is <a href="http://larrytheliquid.com/2007/12/29/compiling-git-and-git-svn-on-osx-tiger/">erről az oldalról szedtem.</a>
+
+%p De hiába, a git-svn parancs nálam ismét csak elszállt, ezúttal egy bus error-ral.
+
+%p
+  %em A forráskódból való telepítéskor gyakran szembesül az ember furcsának tűnő problémákkal, amelyek megoldása sokszor órákig tartó keresgélést és információgyűjtést jelent. Amikor azt hihetnénk megoldást találtunk egy adott problémára egy újabb hibába is futhatunk, de a legfontosabb, hogy ekkor se adjuk fel (két hajtépés közben azért tartsunk egy kis szünetet:). A frusztráló problémák megoldása nem csak elégedettséggel tölthet el bennünket, hanem sok hasznos tapasztalattal is felvértezhet.
+
+%p Kis keresgélés után - az SVN install utasítása alapján - kiderült, hogy csak a SWIG 1.3.29-es verziói alatt stabilak a nyelvi bindingek. Telepítsük tehát fel:
+
+%pre
+  :preserve
+    ./swig 1.3.29_forraskod
+    ./configure --with-perl=/usr/bin/perl
+    make
+    sudo make install
+    
+%p
+  %em A SWIG egy szabványos program, eltérő nyelvek forráskódjának a konverziójára; például C nyelvű forrásokódokat akár Ruby nyelvre is át tudunk "fordítani" a segítségével.
+
+A telepítése után ismét állítsuk elő a szükséges Perl modulokat:
+%pre 
+  :preserve
+    subversion
+    ./configure --with-perl=/usr/bin/perl (!)
+    make
+    make swig-pl
+    make check-swig-pl (Ha itt minden OK akkor rendben vagyunk)
+    sudo make install
+
+%p Ezek után mennie kell az SVN repók importálásának Git-re, és fogadjuk meg, hogy soha nem is térünk vissza hozzájuk:)
+
+%p 
+  %strong Megjegyzés(2008.12.23.):
+  Ezt a cikket elég sok magyarázó szöveggel láttam el az első változata óta, a parancsokat viszont nem próbáltam ki újra, tehát lehetséges, hogy többé már nem állják meg a helyüket - elsősorban a git-svn telepítésére gondolok. 
+
+%p
+  %strong Megjegyzés(2008.12.24.):
+  Ha a Git 1.6.0.6-ra frissítésekor a <em>make install</em> parancs kiadása után az alábbi figyelmeztetést kapjuk:
+  %pre
+    :preserve
+      !! You have installed git-* commands to new gitexecdir.
+      !! Old version git-* commands still remain in bindir.
+      !! Mixing two versions of Git will lead to problems.
+      !! Please remove old version commands in bindir now.
+  %p Akkor törüljük a régi binárisokat a <strong>/usr/local/git/bin</strong> könyvtárból:
+  %pre
+    rm -f /usr/local/git/bin/*  
+  %p És futtassuk újra a <strong>sudo make install</strong> parancsot.

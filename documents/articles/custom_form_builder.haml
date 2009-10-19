@@ -1,0 +1,88 @@
+---
+id: 6
+author: Csiszár Attila
+title: Egyedi FormBuilder Railsben
+image_path: rails_logo.jpg
+created_at: 2008-11-22
+---
+
+%p A Rails sok automatizmust ad a kezünkbe, ezeket legtöbbször azonban felül kell bírálnunk. Viszont a Rubynak és a Rails logikus tervezésének köszönhetően könnyű dolgunk van.
+
+%p Tegyük fel, hogy a következőre van szükségünk:
+
+%ul
+  %li A form beviteli mezőit vegyük körül egy div elemmel
+  %li Rendeljünk hozzá label tagot
+  %li A befogó div osztálya legyen hibás beviteli adat esetén field-with-error
+  
+%p Az első két pontot akár le is kódolhatnánk minden form esetében, vagy használhatnánk partialt, esetleg helpert, a megoldás majdnem nyert ugyanis szükségünk lesz egy egyedi FormBuilder-re. 
+
+%h2 FormBuilder létrehozása
+
+%p Hozzunk létre egy új osztályt a helpereink közé (újabb rails konvenció: app/helpers mappában a form builder-ünk nevével hozzunk létre egy fájlt, pl my_form_builder.rb), így automatikusan be fog töltődni.
+
+%p Ahelyett, hogy megírnánk minden form helper metódust származtassuk le az osztályt a Rails alapértelmezett builder-jéből - ActionView::Helpers::FormBuilder.
+
+%p Kezdjük a text_field metódus felülírásával
+
+%pre
+  :preserve
+    ...
+    def text_field(field, *args)
+      label = label(field,options[:label])<span class="signal">1</span>
+      
+      <span class="signal">2</span>@template.content_tag(:div,label+"<code>&lt;br /&gt;</code>"+super<span class="signal">3</span>,:class=>"input")
+    end
+    ...
+%p A label metódus<span class="signal">1</span> egy sima label tag-et hoz létre, ne feledjük ez az osztályunk metódusa, egyenlő a template-ben meghivott ActionView helperrel. A <span class="signal">2</span> pedig a szülő builder osztályunkból érjük el, ez megintcsak egyenlő a template-ben meghivott content_tag ActionView helperrel. A super-rel<span class="signal">3</span> pedig egyszerűen meghívjuk az ősosztály hasonló metódusát, hogy ne kelljen megírnunk a működését.
+
+%p Az osztály használatához adjuk meg a formok esetében a builder opciót:
+%pre
+  :preserve
+    form_for ... :builder=>MyFormBuilder ... do |f|
+
+%p A text típusú űrlap beviteli(form input) tagokat tehát sikerült div-be csomagolni, mostmár csak a többi helpert kell megírnunk, amelyek gyakorlatilag megegyeznek a fentivel. A DRY elveit követve azonban nem akarunk kódismétlésbe kezdeni. Vessük be a Ruby dinamizmusát: a define_method a segítségünkre van!
+
+%pre
+  :preserve
+    ...
+    helpers = field_helpers - %w(hidden_field label fields_for)<span class="signal">1</span>
+    
+    helpers.each do |name|
+      define_method(name) do |field,*args|
+        label = label(field,options[:label])
+        @template.content_tag(:div,label+"<code>&lt;br /&gt;</code>"+super :class=>"input")
+      end
+    ...
+<span class="signal">1</span> A szülő osztály majd elbánik ezekkel, nekünk nincs szükségünk rájuk.
+
+%p Márcsak a hibás mezők kezelését kell megoldanunk.
+
+%h2 Rails form hibakezelésének felülbírálása
+
+%p Hibás adat esetén a div-hez könnyen hozzáadhatjuk a kívánt osztálynevet(field-with-error), mindösszesen a felülbírált formbuilderünkben kell ellenőrizni, hogy tartozik-e a mezőhöz(field) hibaüzenetet.
+%pre 
+  :preserve
+    ...
+    wrapper_div_classes << INPUT_CLASS_NAME
+    wrapper_div_classes << " \#{ERROR_CLASS_NAME}" unless <span class="signal">1</span>@object.errors.on(field).nil?
+    @template.content_tag(:div,label+"<code>&lt;br /&gt;</code>"+super,:class=>wrapper_div_classes<span class="signal">2</span>)
+    ...
+
+%p Mindössze annyit kell tudnunk, hogy a leszármaztatás miatt az @object osztályváltozóból<span class="signal">1</span> elérhetjük a mezőhöz tartozó ActiveRecord tipusú objektumot, ahonnan megtudhatjuk tartozik-e az adott mezőhöz hibaüzenet. A <span class="signal">2</span>-es pontban pedig hozzáadjuk a div osztályait.
+
+%p Frissítés után láthatjuk, hogy a hibás mezők esetében valóban hozzáadódott az osztálynév, de hogyan iktassuk ki a Rails alapértelmezett hibakezelését, ami div-vel veszi körül nemcsak a hibás mezőt, de a hozzá tartozó címkét(labelt) is.
+
+%p Nos, kevéssé dokumentált és nem is szép megoldás, de működik: felül kell írni az ActionView::Base.field_error_proc-t.
+
+%pre
+  :preserve
+    ActionView::Base.field_error_proc = Proc.new do |html_tag,instance_tag|
+      html_tag
+    end
+
+%p Helyezzük el a fenti kódot a config/initializers könyvtárban pl. field_error_proc.rb néven. Szerver újraindítás után(!) a probléma megoldódik.
+
+%p A forrás elérhető <a href="http://github.com/csiszarattila/myformbuilder/tree/master">GitHub</a>-ról, így:
+%pre
+  git clone git://github.com/csiszarattila/myformbuilder.git

@@ -1,0 +1,325 @@
+---
+id: 9
+author: Csiszár Attila
+title: CouchDB - szakítás a relációs adatbázisokkal
+created_at: 2009-02-06
+image_path: couchdb-logo.jpg
+---
+%p  <a href="http://lackac.hu/2009/01/19/bibliaolvaso">Bácsi László(lackac) blogbejegyzésében</a> olvastam először a CoucDB-ről, és annyira megtetszett a koncepciója, hogy gondoltam Én is teszek egy mélyebb ismerkedést vele - mintegy kikapcsólódásként két záróvizsga tétel között.
+  
+%p  A következő bejegyzést két részre bontottam, az elkövetkezőben a CouchDB koncepcióját ismerheted meg működés közben, példákon keresztül. Míg <a href="./couchdb_rubyban">a cikk második része megmutatja hogyan használhatjuk a CoucDB-t Rubyban</a>.
+ 
+%h2 Koncepció - röviden
+
+%p A CouchDB több szempontból sem mindennapi adatbázis kezelő. Mindenekelőtt szakít a hagyományos relációs adatbázisok koncepciójával: az adatainkat séma-mentes formában tárolhatjuk benne. A táblázatok helyett dokumentumaink vannak, amelyek mezőnév/attribútum/tulajdonság és a hozzájuk tartozó adatok formájában tárolják az információkat. Mivel nincsenek előre meghatározott sémáink az egyes dokumentumok bármilyen adatpárt felvehetnek.
+
+%p Másrészt a CouchDB-vel a HTTP protokollon keresztült kommonikálhatunk az adatbázisunkkal! Ráadásul a HTTP protokoll használata és az URL-k kiosztása a REST elveire épül: az adatbázisaink benne a dokumentumaikkal lesznek az erőforrásaink, a HTTP metódusok pedig a művelet célját jelölik majd. De, hogy a dolgok ne legyenek ennyire egyszerűek: az adatok kinyerése és felvitele JSON formátumban történik.
+
+%h2 Telepítés
+
+%p Ezúttal nem sok kedvem volt manuálisan, forrásból telepíteni a sok függőség miatt és mivel a kipróbáláson volt a hangsúly, így a MacPorts-on keresztül tettem fel a CouchDB-t. Ehhez először érdemes ellenőrizni, hogy naprakész-e a csomagok(portok) listája:
+
+%pre sudo port selfupdate
+
+%em Én erről megfeledkeztem, és egy korábbi (0.7.2-es) verzió települt fel, ami persze köszönő viszonyban sem állt a dokumentációban állítottakkal, sok dolog másként működött, ugyanis az új verzió óta (0.8.1) <a href="http://wiki.apache.org/couchdb/Breaking_changes">renteget változás</a> történt.
+
+%p Majd telepítsük a couchdb csomagját:
+
+%pre sudo port install couchdb
+
+%em Itt máris tarthatunk egy kis szünetet, ugyanis az Erlang csomag telepítése eltarthat egy ideig.
+
+%p  Sikeres telepítés után indítsuk el a CouchDB szervert a következő paranccsal:
+
+%pre sudo couchdb
+
+%p Elsőként érdemes egy böngésző segítségével a CouchDB webes kezelőfelületét kipróbálni a <a href="http://localhost:5984/_utils/index.html">http://localhost:5984/_utils/index.html</a> címen. Itt létrehozhatunk új adatbázisokat és dokumentumokat, valamint feltölthetjük őket adatokkal. Érdemes a Firebug segítségével követni a felhasználói felület parancsait, hogy lássuk a háttérben milyen HTTP kéréseket küld és miképp adja meg az adatokat JSON formátumban.
+.img
+  %img{:src=>"http:/csiszarattila.com/rubysztan/images/couchdb_web_interface.jpg"} 
+  %p Futon - a CouchDB web alapú interfésze
+  
+%h2 Ismerkedés
+
+%p Mielőtt Rubyban kezdenénk el használni a CouchDB-t érdemes a HTTP vagy REST API-n átrágni magunkat, még akkor is, ha tisztában vagyunk ezeknek az elveivel, van ugyanis pár elem, ami nagyban meghatározza az elküldendő adatok formátumát. Ehhez próbáljunk parancssorból kommunikálni az adatbázissal a telnet vagy a curl segítségével.
+
+%p Először hozzunk létre egy adatbázist a PUT metódussal:
+
+%pre curl -i -X PUT http://localhost:5984/blog/
+
+%em A curl i kapcsolójával kiírathatjuk a HTTP válasz fejlécét, az X el pedig a HTTP kérés metódusát adhatjuk meg.
+
+%p Hasonló választ kell, hogy kapjunk:
+
+%pre
+  :preserve
+    HTTP/1.1 201 Created
+    Content-Type: text/plain;charset=utf-8
+
+%h2 Dokumentumok kezelése
+
+%p Most hogy létrehoztuk az adatbázist, adjunk hozzá egy dokumentumot, és helyezzünk el benne különféle adatokat.
+
+%pre
+  :preserve
+    curl -i -X PUT http://localhost:5984/blog/couchdb_cikk \
+    -d '{ "author":"Csiszar Attila", "title":"CouchDB cikk"}'
+
+%p Ezután kérdezzük le a GET metódussal:
+
+%em Ezúttal a telnet-et használtam mivel a curl valamiért nem akaródzott a HTTP válasz törzsét kiolvasni.
+
+%pre
+  :preserve
+    $ telnet localhost 5984
+
+    GET http://localhost:5984/blog/couchdb_cikk/ HTTP/1.0
+
+    HTTP/1.1 200 OK
+    Content-Type: text/plain;charset=utf-8
+    Etag: 2482599723
+
+    {"_id":"couchdb_cikk","_rev":"2482599723","author":"Csiszar Attila","title":"CouchDB cikk"}
+
+%p Mint látjuk a CouchDB két speciális mezőt rendelt a dokumentumunkhoz: az <strong>id</strong>t, mint azonosítót amely felvette az erőforrásunk címét - ezt a kérésünkkel adtuk meg -, valamint hozzárendelt egy <strong>rev</strong> tulajdonságot is. 
+
+%em A <strong>_</strong> jellel kezdődő tulajdonságok a CouchDB számára fentartott értékek, nem módosíthatjuk őket.
+
+%p Az azonosítóknak adatbázis szinten egyedinek kell lenniük, hiszen ezt használjuk az URL-kben is - gyakorlatilag bármilyen karaktersorozatot felvehetnek. Ha nem szeretnénk az egyedi azonosítók megadásával bajlódni, használhatjuk a POST metódust dokumentumok létrehozására, mivel ez egyedi azonosítót fog rendelni a dokumentumhoz. Mivel POST metódus esetén nem konkrét erőforrásra, hanem erőforrás-kollekcióra szoktunk hivatkozni, a címünknek ezúttal az adatbázis elérését kell megadnunk:
+
+%pre
+  :preserve
+    curl -i -X POST http://localhost:5984/blog/ \
+    -d '{ "author":"Csiszar Attila", "title":"Másik CouchDB cikk"}'
+
+%p A válasszal visszakapjuk a létrehozott dokumentum (erőforrás) azonosítóját:
+   
+%pre
+  :preserve
+    HTTP/1.1 201 Created
+    Content-Type: text/plain;charset=utf-8
+
+    {"ok":true,"id":"19BF2F4BF267E8CCF120A2B3EB444C19","rev":"3269339116"}
+
+%p A másik fontos mező, a <strong>rev</strong> érték: ez jelöli a dokumentum aktuális változatát. Ez még fontos lesz a változtatások felvitelekor, ugyanis azt meg kell adnunk az adataink között, lássuk:
+
+%pre
+  :preserve
+    curl -i -X PUT http://localhost:5984/blog/couchdb_cikk \
+    -d '{ "_rev":"2482599723", "body": "Ez hosszu cikk lesz..." }'
+
+%p Ha a megadott azonosító nem egyezik az adatbázisban lévő dokumentum aktuális értékével, akkor a változtatások nem kerülnek érvényre és egy 409 Conflict választ kapunk vissza. A rev értéke megjelenik az Etag HTTP fejlécben is, így remekül használhatjuk konfliktuskezelésre.
+
+%p A fentiekből látható, hogy a CouchDB REST APIjában a dokumentumaink - tehát az adataink elvi tárolói - lesznek az erőforrásaink, az elérésükhöz(URL) az azonosítóikat használjuk fel, és a megfelelő HTTP metódusokkal tudunk rajtuk műveleteket végezni.
+
+%h2 Mellékletek
+  
+%p A CouchDB további érdekessége, hogy a dokumetumaink mellé lehetőségünk van mellékleteket csatolni, csakúgy, mint az e-mailek esetében. Ezt a speciális <strong>_attachments</strong> tulajdonsággal tehetjük meg és az adatoknak base64 enkódolásúaknak kell lenniük.
+
+%pre
+  :preserve
+    curl -i -X PUT http://localhost:5984/blog/couchdb_cikk \
+    -d '{ "_id":"couchdb_cikk", "_rev": "2812696990", "_attachments": { "csatolt.txt": { "content_type":"text\/plain", "data":"Q3NhdG9sdCBkb2t1bWVudHVt"} } }'
+
+%em Érdekes működés, hogy bár az URL-ben szerepel a dokumentum azonosítója azt ugyanúgy meg kell adnunk az átadott JSON adatban is.
+
+%p Az átadott JSON adat kicsit áttekinthetőbben:
+
+%pre
+  :preserve
+    { "_id":"couchdb_cikk",
+      "_rev": "2812696990",
+      "_attachments": 
+      { 
+        "csatolt.txt": 
+          { 
+            "content_type":"text\/plain", 
+            "data":"Q3NhdG9sdCBkb2t1bWVudHVt"
+          } 
+      }
+    }
+
+%p Ismét csak a telnet segítségével kérdezzük le a dokumentumot.
+
+%pre
+  :preserve
+    GET /blog/couchdb_cikk/ HTTP/1.0
+
+    {
+      "_id":"couchdb_cikk",
+      "_rev":"3172282319",
+      "_attachments":
+      {
+        "csatolt.txt":
+        {
+          "stub":true,
+          "content-type":"text\/plain",
+          "length":18
+        }
+      }
+    }
+  
+
+%p A csatolmányokat nem kapjuk vissza a dokumentum lekérésekor automatikusan - ezt jelzi a stub:true érték - azokat külön URL-ken, a nevükön keresztül érhetjük el a dokumentum alatt, például így:  <strong>/blog/couchdb_cikk/csatolt.txt</strong>.
+
+%pre
+  :preserve
+    GET /blog/couchdb_cikk/csatolt.txt HTTP/1.0
+
+    HTTP/1.1 200 OK
+    Content-Type: text/plain
+    Content-Length: 18
+
+    Csatolt dokumentum
+
+%p Ezt az URL elérést felhasználhatjuk a dokumentumok módosítására, sőt feltöltésére is. Így nem kell a JSON formátummal és base64 enkódolással bajlódni, mindössze a Content-Type HTTP fejléccel kell jeleznünk az adatunk formátumát.
+
+%pre
+  :preserve
+    PUT /blog/couchdb_cikk/kep.jpg
+    Content-Type:image/jpeg
+    Content-Length:123
+
+    &lt;JPEG adat&gt;
+
+%p A csatolmányok egyik érdekes felhasználása lehet, hogy képeket tároljunk adatbázisszinten, amelyet azután egyszerűen meg tudunk jeleníteni a weboldalainkon a HTTP-s elérésnek köszönhetően.
+
+%h2 Nézetek
+
+%p A CouchDB-ben a nézetek felelnek meg a relációs adatbázisok lekérdezéseinek. A nézetek JavaScript nyelven írt kódok.
+ 
+%p A nézetek kipróbálására érdemes a fentebb már említett http://localhost:5984/_utils/index.html címet megkeresni, ha belépünk az adatbázisunkba jobb oldalt felül találunk egy Select View legördülő listát innen pedig válasszuk a Custom query... pontot - így kicsit interaktívabb módon ellenőrizhetjük a változtatásaink közvetlen eredményét.
+
+%p Nézzünk egy egyszerűbb nézetet:
+
+%pre
+  :preserve
+    function(doc) {
+      map(null, doc)
+    }
+
+%p Amint látható a nézetek egyszerű JavaScript funkciók, paraméterként pedig megkapják a bejárás során épp aktuális dokumentumot - <strong>doc</strong> változó. A funkción belül bármilyen logikát elhelyezhetünk, egy a lényeg, ha szeretnénk egy dokumentumot visszaadni a nézetben akkor az <strong>emit</strong> funkciót kell használnunk. Ennek első paramétereként megadhatjuk a dokumentum egy tulajdonságát, a nézet dokumentumait ez alapján fogja sorba rendezni, második paraméterként a dokumentum visszaadott tulajdonságait szűkíthetjük le. Lásd a következő példát:
+
+%pre
+  :preserve
+    function(doc) {
+      emit(doc.title, {"Cim":doc.title, "Datum":doc.date, "ID":doc.id })
+    }
+
+%p Ebben a nézetben a címek alapján lesz rendezve az összes dokumentum, és csak a megadott tulajdonságok (Title, Date, Id) szerepelnek mellettük, a megadott nevekkel.
+
+%p A nézeteket kétféleképpen "érhetjük" el a HTTP API-n keresztül. Egyrészt POST kérésként átadhatjuk a megírt nézet függvényt az /{dbnév}/_slow_view URL-nek.
+
+%pre
+  :preserve
+    curl -X POST  \
+    -H 'Content-Type: text/javascript' \
+    -d 'function(doc){map(null, {"Title":doc.title, "Date":doc.date, "Id":doc.id }) }' \
+    http://localhost:5984/blog/_slow_view
+
+%p A visszakapott válasz:
+
+%pre
+  :preserve
+    {
+      "total_rows":3,
+      "offset":0,
+      "rows":
+      [
+        {
+          "id":"19BF2F4BF267E8CCF120A2B3EB444C19",
+          "key":null,
+          "value":
+          {
+            "Title":"CouchDB cikk"
+          }
+        },
+      
+        {
+          "id":"B7CFF70741ED178736D044F342B085EE",
+          "key":null,
+          "value":
+          {
+            "Title":"Masik CouchDB cikk"
+          }
+        }
+      ]
+    }
+
+%p A CouchDB terminológusában ezeket ideiglenes nézeteknek nevezzük, és inkább csak tesztelési célokra ajánlott használatuk - erre is utal a _\_slow\_view_ URL elnevezés. Ennél sokkal hatékonyabb, ha a nézeteinket is dokumentumokként, az adatbázisban tároljuk el: ekkor azok minden adatbázisban történt változás hatására - tehát például ha módosítunk egy dokumentumot - automatikusan lefutnak, az eredményeik pedig előre eltárolódnak! Ez sokkal gyorsabb működést eredményez.
+
+%p A nézetek mint dokumentumok a következő formában tárolódnak:
+
+%pre
+  :preserve
+    {
+      "_id": "_design/posts",
+      "_rev": "3294989902",
+      "language": "javascript",
+      "views":
+      { 
+        "all_by_title":
+        { 
+          "map" : "function(doc){ emit(doc.title, {'Title':doc.title, 'Date':doc.date, 'Id':doc.id })}"
+        },
+      
+        "all_by_author":
+        {
+          "map" : "function(doc){ emit(doc.author, doc)}"
+        }
+      }
+    }
+
+%p A kulcs a nézet-dokumentumok elnevezésében adódik: mindegyiket a <strong>_design/</strong> formával kell kezdenünk. A nézet-dokumentumok nemcsak egy, hanem tetszőleges számú nézetet tartalmazhatnak, elkülönítésükben az egyedi elnevezésük segít. A fenti példában például az első, all_by_title cím szerint, míg a második, all_by_author szerző szerint fogja visszadni a dokumentumjainkat.
+
+%p A fenti nézet-dokumentumot egyszerűen hozhatjuk létre az adatbázisunkban:
+
+%pre
+  :preserve
+    curl -X PUT \
+    -d '{ "language": "javascript", "views":{ "all_by_title": { "map" : "function(doc){ emit(doc.title,{'Title':doc.title, 'Date':doc.date, 'Id':doc.id })}" }, "all_by_author":{ "map" : "function(doc){ emit(doc.author, doc)}" } }}' \
+    http://localhost:5984/blog/_design/posts
+
+%p Válaszként pedig valami hasonlót kell kapnunk:
+  
+%pre {"ok":true,"id":"_design\/posts","rev":"3294989902"}
+
+%p A tárolt nézetek eredményét ezután egyszerűen egy GET kéréssel olvashatjuk ki, de erre már a <strong>_view/</strong> útvonalat kell használnunk. Mivel eredetileg a _design/<strong>posts</strong> azonosítót adtuk a nézetet tároló dokumentumnak, a teljes elérést a _view/<strong>posts/</strong>all_by_title URL fogja szolgáltatni.
+
+%pre
+  :preserve
+    GET http://localhost:5984/blog/_view/posts/all_by_title HTTP/1.0 
+
+    {
+      "id":"4fbdaedba5b66d4894191b8a52895c76",
+      "key":"CouchDB cikk",
+      "value":
+      {
+        "Title":"CouchDB cikk"
+      }
+    },
+    {
+      "id":"5126ff560acb43f444149b502fd1484b",
+      "key":"CouchDB cikk",
+      "value":
+      {
+        "Title":"CouchDB cikk"
+      }
+    }
+    
+%h2 Összegzés
+
+%p A fenti csak néhány példa volt a CouchDB REST API-jának a használatára, a teljesség igénye nélkül próbáltam bemutatni a főbb működést. Részletesebb információkért érdemes átrágni magunkat a <a href="http://wiki.apache.org/couchdb/Reference">CouchDB teljes referenciáján</a>, ha szeretnénk megismerni az összes lehetőséget.
+
+%p Mindezt azonban érdemes volt összefoglani, mielőtt rátérnénk arra, hogy hogyan is használhatjuk a CouchDB-t Rubyban.
+
+<strong><a href="couchdb-rubyban">A bejegyzés folytatását: A CouchDB találkozása a Rubyval ezen a linken keresztül érheted el.</a></strong>
+
+%h2 További olvasnivalók
+  
+%p
+  %a{:href=>"http://www.benatkin.com/weblog/2008/09/13/trying-out-couchdb-in-firebug/"} CouchDB kipróbálása Firebugban
+%p
+  %a{:href=>"http://jan.prima.de/~jan/plok/archives/129-Another-week-or-two-in-CouchDB.html"} Érdekes projektek és sok-sok link a CouchDB-ről
+
+%p
+  %a{:href=>"http://aimee.mychores.co.uk/2008/09/07/post/320/"} Nyolc részes cikksorozat szintén a CouchDB használatáról Rubyban

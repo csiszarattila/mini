@@ -1,0 +1,229 @@
+---
+id: 7
+title: A Rails munkamenet kezelése
+author: Csiszár Attila
+image_path: rails_logo.jpg
+created_at: 2009-01-04
+---
+%p Ebben a cikkben igyekszem összefoglalni a Rails munkamenet kezelési megoldásának alapjait: hogyan működik, miként használhatjuk azt. Ha nem ismernéd pontosan mi az a munkamenet-kezelés és miért van rá szükségünk webalkalmazások fejlesztésekor a cikk elején összefoglaltam. Ha ezekkel tisztában vagy nyugodtan ugorj a <a href="#rails">Rails specifikus részekhez</a>.
+
+%h2 Mi az a munkamenet-kezelés?
+%em „Amikor egy asztali (desktop) alkalmazással dolgozunk, megnyitjuk, változtatunk valamit, majd bezárjuk. A számítógép tudja, hogy ki végzi a műveletet. Tudja, amikor elindítjuk az alkalmazást, és amikor bezárjuk. De az interneten ez nem így van. A webszerver nem tudja, hogy kik vagyunk és mit csinálunk, mert a HTTP protokoll nem tartja meg a kérések közt az állapotát.
+%a{:href=>"http://nagygusztav.hu/?q=web_programozas_i_jegyzet_0_7_verzio"}Nagy Gusztáv: Web programozás jegyzet 0.7 - 8.2.6. fejezet, 171 .oldal
+  
+%p A HTTP protokollt állapotátmeneti protokollnak is nevezzük, mivel nem képes a kérések között egyértelmű kapcsolatot teremteni. A HTTP protokoll szabványa ezt nem írja elő, viszont sok esetben szükségünk van rá: ha egyértelműen meg tudnánk állapítani hogy ki intézte a HTTP kérést megtudnánk mondani, hogy korábban milyen műveleteket végzett(pl. egy webáruháznál milyen termékeket helyezett egy kosárba) vagy, hogy jogosult-e a művelet elvégzésére. Ennek leküzdésére az idők folyamán többféle megoldást is kitaláltak, amelyeket egységesen munkamenet kezelésként definiálunk.
+
+%h2 Milyen munkamenet-kezelési megoldások vannak?
+%p A munkamenet-kezelések többsége valamilyen egyedi azonosító előállítására és továbbítására épül. Amikor a felhasználó belép vagy elindítja az alkalmazásunkat egy - annak lejáratáig mindenképp - egyedi azonosítót kap, amelyet valahogy a válaszokkal el kell küldenünk és minden kéréssel meg kell kapnunk.
+
+%h3 Mutasd az URL-ed, megmondom ki vagy!
+
+%p Ennek a legegyszerűbb megoldása, ha a kérések URL-jében helyezzük el ezt az azonosítót. Mivel a felhasználó leggyakrabban linkeken keresztül kommunikál az alkalmazásunkkal gyakran találkozhatunk (korábban mindenképp) ilyen URL-kel:
+%pre
+  http://szupertitkos-alkalamazas.com/index.php?PHPSESSID=04934454521c14300dd2faaa99deff
+  
+%p Ahol nyilvánvalóan az alkalmazás feladata, hogy az URL-t feldolgozva értelmezze azt, az előállított HTML válaszokban pedig a megfelelő azonosítókat elhelyezze a linkekben.
+  
+%p Ez a megoldás viszont több szempontból sem szerencsés. Egyrészt nem túl felhasználóbarát: zavaró, adott esetben túl hosszú URL-eket eredményez, amelyek ráadásul nem könyvjelzőzhetőek. Másrészt könnyebben kivannak téve rossz indulatú támadások célpontjának, tehát nem túl biztonságosak.
+
+%em Arról nem is beszélve, hogy a felhasználó akár tudtán kívül is biztonságos vagy személyes információkat adhat át - akár ismerősének is - azzal, hogy a teljes URL-t elküldi neki, az ismerős pedig megnyitva azt belép az ő munkamenetébe. Ezért az egyedi azonosítót érdemesebb más módszerekkel átadni két kérés között.
+
+%p Az is nyilvánvaló, hogy ez a probléma csak a GET metódusú kéréseket érinti, ha POSTtal küldjük el a munkamenet-azonosítót akkor az nem fog megjelenni az URL-ekben. 
+
+%p A felhasználó böngészője viszont POST-olt adatokat csak űrlapelemekkel küldhet az alkalmazásunk számára úgy, hogy egy submit tipusú gombra kattint előtte - ekkor nyilvánvalóan célszerűbb a munkamenet-azonosítót rejtett űrlapelemként átadni a kérésekkel. De ez a tény nyilvánvalóan csak akkor segít, ha a felhasználónak egyébként is valamilyen űrlapot kell kitöltenie, máskülönben minden linkünket gomb elemre kellene cserélnünk, amit körbefogunk, egy a linkre mutató form elemmel.
+
+%p De ne aggódjunk, létezik egy ennél sokkal jobb, transzparens megoldás.
+
+%h3 Süssünk sütit!
+%p A böngészők többsége ma már kivétel nélkül támogatja a <a href="http://tools.ietf.org/html/rfc2965">sütiket (cookies)</a>, amelyek lehetővé teszik, hogy információt helyezzünk el a látogatónál, majd azt a következő kéréssel visszakapjuk.
+
+%p Sütiket egyszerűen a HTTP válaszokkal küldhetünk a látogatónak. Például egy ilyen válasz fejléce a következőképpen nézhetne ki:
+
+%pre
+  :preserve
+    HTTP/1.1 200 OK
+    Set-Cookie: azonositod=abcdef12345
+
+%p Amikor a felhasználó böngészője értelmezi a HTTP válasz fejlécét és sütit talál benne eltárolja azt, semmi mást nem csinál vele.
+ 
+%em Sokan vélik veszélyesnek a sütik használatát és blokkolják, de ez teljesen felesleges, mivel a szabvány pontosan előírja, hogy a böngészőknek csak tárolniuk kell azokat, majd a következő kérésekkel visszaadniuk a szervernek, nem kötelesek futtatni, így kártékony kódok elhelyezése is haszontalan bennük.
+  
+%p A fentebb eltárolt sütit ekkor a böngésző visszaküldi a következő kérésével - összeveti, hogy a kért címhez tartozik-e eltárolt süti:
+%pre
+  :preserve
+    GET / HTTP/1.1
+    Cookie: azonositod=abcdef12345
+
+%p A szerverünk számára mindez még ugyanúgy nem jelent semmilyen plusz információt, a mi dolgunk, hogy a süti adataiból valahogy munkamenetet varázsoljunk.
+
+%p Ugyanakkor, mint láthattuk a sütik használatával két megoldás közül is válaszhatunk: 
+%ul
+  %li 
+    %p egyrészt akár elküldhetjük a teljes munkamenetet is, az összes adatával együtt. Nyilván ekkor érdemes figyelembe venni, hogy bizalmas adatokat csak kódolt formában továbbítsunk! Egyrészt a HTTP forgalmat bármikor lehallgathatják, így bizalmas információkhoz juthatnak hozzá illetéktelenek, ugyanakkor a sütik tartalmát a felhasználó is bármikor megtekintheti. 
+    %em Sokszor veszélytelennek tűnő információk is okozhatnak gondokat például, ha egy webáruház kosárát szintén sütikben tároljuk egy leleményes felhasználó akár bele is piszkálhat a rendelési- végösszegbe elég komoly galibákat okozva.
+    
+  %li másrészt - és ez a leggyakoribb - a fentebb már említett módon egy munkamenetet-azonosítót rendelünk a HTTP kéréshez, amit visszajuttatunk a neki szóló válaszunkkal. Ehhez a munkamenet-azonosítóhoz a szerveren adott erőforrások - adatok - fognak tartozni.
+
+%p Mindkét megoldás rendelkezik előnyökkel és hátrányokkal, ezeket a Rails munkamenetkezelésének jellemzésekor bővebben is látni fogjuk.
+
+%a{:name=>"rails"}
+%h2 A Rails munkamenet-kezelése
+
+%p A cikk első részében láthattuk, hogyan tudunk az állapotmentes HTTP protokollból azonosítható munkameneteket létrehozni. Mielőtt mélyebbre néznénk, hogy a Rails keretrendszer ezeket hogyan alkalmazza, érdemes a felszínen maradni és megnézni, hogyan rejti el mindezt a szemünk elől.
+
+%h3 Csacsog a felszín, hallgat a mély
+%p A Rails sok más keretrendszerhez hasonlóan egy központosított változót használ adatok elhelyezésére illetve kivételére a munkamenetek között. A <strong>session</strong> nevű hash tölti be ezt a szerepet - a PHP-ben például hasonló a $_SESSION nevű szuperglobális változó.
+
+%p A session változót a hasheknek megfelelően tudjuk használni, így:
+%ul
+  %li 
+    Adat elhelyezése
+    %pre
+      session[:user_id] = user.id
+  %li 
+    Adat lekérdezése
+    %pre
+      user_id = session[:user_id]
+  %li 
+    Adat Törlése
+    %pre
+      session[:user_id] = nil
+
+%p Mindösszesen ennyit elegendő tudnunk, ha munkameneteket akarunk kezelni a Rails keretrendszerrel. Az ugyanis minden mást elintéz helyettünk, az alapértelmezett beállítások pedig megfelelnek a hatékony/biztonságos szűrőnek.
+
+%h3 A Rails alapértelmezett beállításai
+%p Mielőtt mélyebbre ásnánk a Rails munkamenet-kezelési beállításaiban érdemes tudnunk, hogy az teljes egészében a Ruby CGI moduljának Session osztályára épül.
+
+%p A Rails alapértelmezettként - a 2.0-ás verzió óta - a munkamenetek-tartalmát sütiken keresztül továbbítja, így a szerver helyett a felhasználó böngészője tárolja az adatokat, azok a sütikben vándorolnak a kérések között.
+
+%p Egy Rails alkalmazás HTTP válasza ez esetben a következőképpen nézhet ki, ha némi adatot helyezünk el a munkamenetben:
+%pre
+  :preserve
+    HTTP/1.1 200 OK
+    Set-Cookie: _testapp_session=BAh7CDoMY3NyZl9pZCIlMmEyMzA5YmRjZmRiMjU4M2RkYzkxOWVhYm
+      Y2ZGFj%0AMjE6DHVzZXJfaWQiBzIyIgpmbGFzaElDOidBY3Rpb25Db250cm9sbGVyOjpG%0AbGFzaDo6Rmxhc2h
+      IYXNoewAGOgpAdXNlZHsA--5c40d34a7d2c084988efba2ba5fdfc17ed6f9244; path=/
+
+%p Mint látható a munkamenetek biztonsági szempontból erősen titkosítva vannak. Vedd észre, hogy a karaktersorozat tartalmaz két elválasztó karaktert(--), az ez után álló karakterlánc a munkamenet-adatainak a hash összege, amit az alkalmazáshoz tartozó egyedi kulccsal képez. Ezt a <strong>config/environment.rb</strong> fájlban találjuk meg:
+%pre
+  :preserve
+    ...
+    # Your secret key for verifying cookie session data integrity.
+    # If you change this key, all old sessions will become invalid!
+    # Make sure the secret is at least 30 characters and all random, 
+    # no regular words or you'll be exposed to dictionary attacks.
+    config.action_controller.session = {
+      :session_key => '_webshop_session',
+      :secret      => 'bba3ecbb125287724a7ed4107b5d467a653b85fc5a672b104f9237e00943c5658b169e3df97aaf322fe2bdb81a8b48fca27299c936232d0c1dfb4581bb965bee'
+    }
+    ...
+
+%em Ha szeretnénk megváltoztatni az alkalmazáshoz tartozó egyedi kulcsot, generálhatunk egyet a <strong>rake secret</strong> parancs segítségével.
+
+%p A sütik titkosítása egy szintig elegendő biztonságot nyújt: a felhasználók nem tudják értelmezni, a munkamenetek feltörése és átírása a titkosítás erőssége miatt pedig szinte lehetetlen. Ugyanakkor nyilvánvaló hátrányokkal is rendelkezik: ha az alkalmazásban olyan változtatásokat végzünk, amelyek érintik a munkameneteket is, a felhasználóknál lévő elavult tartalmak miatt könnyen érvénytelen adatokat kaphatunk vissza, és a korábbiakat csak különböző trükkök bevetésével tudjuk megváltoztatni. Ráadásul a böngészők többsége mindösszesen 4KiByteban maximalizálja a sütikben tárolt adatok méretét, amit a CookieStore megoldás is korlátozásként alkalmaz.
+
+%em A sütik idevágó szabványa (RFC2965) egyébiránt ajánlásként 20 db, egyenként minimum 4KiB-os sütit fogalmaz meg domainenként a böngészők számára.
+
+%p Nem kell azonban rögtön keresztet vetnünk, a Rails ugyanis biztosít számunkra többféle módot is a munkamenetek tartalmának tárolásához.
+
+%h3 Munkamenet tárolási módok
+%p Az nyilvánvaló, hogy ha a munkameneteket nem a felhasználók, hanem a szerver oldalán szeretnénk tárolni akkor három lehetőségünk adódik:
+%ul
+  %li Tárolhatjuk adatbázisban
+  %li Fájlokban
+  %li A memóriában
+
+%em A három lehetőség közül nyilvánvalóan a memóriában való tárolás lesz a leggyorsabb - nincs felesleges I/O írás illetve olvasás.
+
+%p A Railsben - legjobb tudomásom szerint - hat tárolási mód közül választhatunk. Ezek felét a Ruby CGI moduljának Session osztálya biztosítja a számunkra, úgymint:
+%dl
+  %dh FileStore
+  %dd A munkamenet-adatok szövegként való tárolását jelenti - a HTTP fejlécben formázottnak megfelelően tárolódnak.
+  
+  %dh PStore
+  %dd Szintén fájlban való tárolást jelent, de bináris formában. Így lehetőségünk van objektumok, állapot alapú lementésére is (ha jól tudom ezt nevezik marshalling-nak).
+  
+  %dh Memory Store
+  %dd Mint a neve is mutatja a munkamenetek adatai teljes egészében a memóriában tárolódnak el.
+
+%p A munkamenet-kezelés pontos működésről részletes információkhoz juthatunk, ha végigtanulmányozzuk a <a href="http://www.ruby-doc.org/stdlib/libdoc/cgi/rdoc/classes/CGI/Session.html">CGI modul Session osztályát</a>.
+
+%p A Rails három saját tárolási formával egészíti ki ezeket:
+
+%dh CookieStore
+%dd A fentebb már említett, teljes egészében a sütikben való adattárolást jelenti.
+
+%dh DRbStore
+%dd Az ActionPack modul definiálja, gyors és ideális több processz között megosztandó adatok tárolására.
+
+%dh ActiveRecordStore
+%dd Adatbázisban való tárolást jelent. Ennek segítségével az ActiveRecord-os modelljeinkhez hasonlóan fognak a munkamenet-adatok kezelődni - számunkra ez teljesen transzparens lesz, hiszen a munkamenet-adatokat a fentieknek megfelelően továbbra is a <strong>session hash</strong>-el érhetjük el.
+%p
+  %em A CGI module Session osztálya ugyanakkor lehetővé teszi, hogy saját tárolási módokat is létrehozzunk.
+
+%p A munkamenet-tárolási módok mindegyike nyilvánvalóan rendelkezik <a href="http://scott.elitists.net/sessions.html">előnyökkel és hátrányokkal</a>, közülük most az adatbázisban való tárolást szeretném kiemelni.
+
+%h3 ActiveRecordStore
+%p Ennek a tárolási módnak a használatához először létre kell hoznunk a munkamenet-adatok tárolására szolgáló táblát: a <em>db:sessions:create rake taszk</em> elvégzi helyettünk a szükséges séma előállítását, így csak futtatnunk kell a migrációt. 
+%pre
+  :preserve
+    rake db:sessions:create
+    rake db:migrate
+
+%p A létrejövő táblázat egy nagyon egyszerű struktúrával rendelkezik:
+%pre
+  :preserve
+    create_table "sessions", :force => true do |t|
+      t.string   "session_id", :default => "", :null => false
+      t.text     "data"
+      t.datetime "created_at"
+      t.datetime "updated_at"
+    end
+
+%p A táblázat létrehozása után meg kell adnunk, hogy a keretrendszer az adatbázison keresztül kezelje a munkameneteket: a környezetünk konfigurációjában ( hogy az összesre érvényes legyen a <strong>config/enviroment.rb</strong> fájlban) a <strong>config.action_controller.session_store </strong> beállításnál az <em>:active_record_store</em> paramétert kell megadnunk:
+%pre
+  :preserve
+    # Use the database for sessions instead of the cookie-based default,
+    # which shouldn't be used to store highly confidential information
+    # (create the session table with "rake db:sessions:create")
+    config.action_controller.session_store = :active_record_store
+
+%p A szerverünk újraindítása után a sütikben már csak a munkamenetekhez rendelt azonosítók fognak utazni: ennek a segítségével fogja a keretrendszer a munkamenethez tartozó adatokat előszedni az adatbázisból. Ha törölni szeretnénk minden korábbi munkamenet adatát az adatbázisból futtassuk a <strong>db:session:clear</strong> rake taszkot.
+
+%h3 Az ActionController::InvalidAuthenticityToken kivétel feloldása
+%p Közvetlenül az adatbázisos munkamenet tárolásra való átállás után botlottam a fenti kivételbe. Az elsőre érthetetlennek tűnő probléma <a href="http://kl93.blogspot.com/2008/04/actioncontrollerinvalidauthenticitytoke.html">gyorsan orvosolható</a>: az <strong>app/controllers/application.rb</strong> fájlban vegyük ki a komment jelet a protect_from_forgery metódus után álló secret szimbólum<span class="signal">1</span> elől.
+%pre
+  :plain
+    ...
+    # See ActionController::RequestForgeryProtection for details
+    # Uncomment the :secret if you're not using the cookie session store
+
+    protect_from_forgery  <span class="signal">1</span>:secret => 'f62528d702c4231e586e9d688f824a8e'
+    ...
+    
+%p A Rails ugyanis az ActiveRecordos munkamenet kezelésre való átállás után minden űrlapban elhelyez egy titkosított kódszót(Authenticity Token) rejtett űrlapmezőként, majd a kérések fogadásakor ellenőrzi azokat, ezzel megelőzve, hogy - a GET metódusos kérések kivételével - kéréseket lehessen küldeni az alkalmazáson kívülről is mintegy védekezésképp a CSRF (Cross-Site Request Forgery) támadások ellen. Ha konkrétabban is érdekel a probléma és magának a támadásnak a leírása az <a href="http://api.rubyonrails.org/classes/ActionController/RequestForgeryProtection/ClassMethods.html">API ide vágó részét</a> érdemes elolvasni.
+
+%h2 Mit tegyünk, ha tiltottak a sütik
+%p Mint láthattuk a Rails munkamenet-kezelése a sütikre épül azonban ha a felhasználó böngészőjében a sütik-kezelése tiltva van ez nem működőképes megoldás. A keretrendszer ekkor az űrlapokban automatikusan minden válasszal generál egy rejtett form elemet is, amely így visszaküldheti a munkamenet-azonosítót vagy a munkamenet-adatokat a következő kéréssel a szervernek - a CGI modul valójában automatikusan elvégzi ezt a műveletet helyettünk. Ugyanakkor ez csak az űrlappal elküldött kéréseket érinti, ha URL-ben paraméterként szeretnénk továbbítani a munkamenet-azonosítót arról magunknak kell gondoskodnunk.
+
+%h2 Flash hash - a Rails egy speciális munkamenet eljárása
+%p Szorosan a Rails munkameneteihez tartozik a flash hash használata. Bizonyos esetekben ugyanis szükségünk van arra, hogy üzeneteket tudjunk átadni két átirányított esemény között, például hogy hibaüzeneteket vagy információkat közöljünk a felhasználóval.
+
+%p Azonban mivel minden átirányítás során a Rails új vezérlő objektumokat hoz létre és így az előzőleg létrehozott példányváltozók elvesznek, ezeket kénytelenek vagyunk a munkamenetben elhelyezni, majd minden lehíváskor törölni az eredeti üzenetet. A Rails ezt a folyamatot teszi automatikussá(szükségtelenné) a flash hash használatával.
+
+%p A flash változót ugyanúgy használhatjuk, mint a session változót, azzal a különbséggel, hogy a benne tárolt adat mindösszesen egy válaszig őrzi meg tartalmát, utána automatikusan törlődik.
+
+%p A flash rendelkezik továbbá két segéd metódussal: flash#new[] és flash#keep(). Az előbbi a flash tartalmát csak az éppen futó eseményig tárolja el, nem adja át azt egy következőnek a munkamenetben. Míg utóbbi megőrzi a már létező flash tartalmat a következő  átirányításig is.
+
+%h2 További olvasnivalók
+%p
+  %a{:href => "http://wiki.rubyonrails.com/rails/pages/sessions"} A Rails Wiki bejegyzése a munkamenetekről
+%p
+  %a{:href=>"http://github.com/rails/rails/tree/master/actionpack/lib/action_controller/session/cookie_store.rb"} A CookieStore megvalósítása
+
+%p 
+%a{:href=>"http://www.rorsecurity.info/2007/11/20/rails-20-cookies/"} Biztonsági kockázatok a CookieStore-al kapcsolatban.
+%p 
+  %a{:href=>"http://www.quarkruby.com/2007/10/21/sessions-and-cookies-in-ruby-on-rails"} Főként linkekkelt teletűzdelt, de hasznos összefoglaló a Rails munkameneteiről.
+%p
+  %a{:href=>"http://scott.elitists.net/sessions.html"} Kicsit régi cikk, de teljesítménytesztekkel mutatja be a tárolási módokat

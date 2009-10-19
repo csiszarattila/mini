@@ -1,0 +1,113 @@
+---
+id: 2
+title: Ruby blokkok közelebbről
+author: Csiszár Attila
+image_path: ruby_logo.png
+created_at: 2008-10-19
+---
+%p A mai célünk megtanulni, hogy a következő kifejezés:
+%pre 
+  :preserve
+    Array.new(3) { n += 1; n * 10 }
+    =>[10, 20, 30]
+%p mit is jelent, hogyan is működik pontosan.
+
+%p A Ruby fontos nyelvi elemeit jelentik a blokkok, amelyet szinte minden, Ruby-t használó programozó ismer, a kérdés csak csupán az, tudja is hogy hogyan is működik?
+
+%p Sokak számára rémisztőnek tűnnek, de a blokkok működésének megértése nem igényel bonyolult logikát, 
+ugyanakkor használatuk nagy segítséget jelenthet bizonyos problémák egyszerű megoldásában.  
+
+%p A következőekben példákkal szeretném bemutatni, hogyan használhatjuk a blokkokat Rubyban.
+
+%h2 Hogyan készítsünk saját blokkot kezelő metódust
+
+%p Azt már tudjuk hogyan adhatunk át blokkot egy metódusnak:
+%pre
+  :preserve
+    Array(1, 2, 3).each() {
+      # Ez itt egy blokk
+    }
+%p vagy más formában:
+%pre 
+  :preserve
+    Array(1, 2, 3).each() do
+      # Ez is egy blokk
+    end
+
+%em Én személy szerint a <strong>do end</strong> kulcsszavas megadást többsoros, a kapcsos zárójeleket pedig rövid, egy sorban is elférő utasítású blokkok esetében használom.
+
+%p Vizsgáljuk meg ezek működését kicsit közelebbről:
+%pre
+  :preserve
+    class MyBlock
+      def handle_block  (2)
+        puts "A metódus megkapta a vezérlést"
+        yield   (1)
+        puts "A blokk visszaadta a vezérlést a blokknak"
+      end
+    end
+
+%pre
+  :preserve
+    MyBlock.handle_block() do
+      puts "A metódus átadta a vezérlést a blokknak"
+    end
+
+%p Első ízben a metódusunk hívódik meg(1), a (2) yield nyelvi elem szolgál a blokkok 'vezérlésére'.
+%p Amint az látható a metódusokban ezzel tudjuk a program további futását átadni a kapott blokknak, 
+majd ha az végzett a feladataival újból visszaadja a vezérlést a metódusunknak. 
+Természetesen a yieldet akárhányszor meghívhatjuk a metódusunkban: az mindannyiszor átadja a vezérlést a blokknak, majd visszatér.
+
+Most nézzük meg hogyan tudunk paramétereket is átadni a blokkunknak:
+
+%pre
+  :preserve
+    class MyBlock
+      def handle_block
+        puts "A metódus megkapta a vezérlést"
+        n=1
+        while(n < 4)
+          yield(n)
+          n += 1
+        end
+        puts "A blokk visszaadta a vezérlést a blokknak"
+      end
+    end
+
+    MyBlock.handle_block() { |value|  puts value }
+    => 1 2 3
+
+%p A metódus a yield(n) meghívásával ad át paramétereket a blokknak, míg a blokk a |value| kifejezéssel vesz át paramétereket. A blokk esetében tehát a neki átadott paramétereket a || (pipes - csövek) jelek közé kell tennünk, a yield()-t pedig a megfelelő paraméter sorrenddel kell ellátnunk.
+
+%h2 Blokk visszadott értéke
+
+%p De hogyan tudjuk a blokk visszaadott értékét felhasználni. Például tételezzük fel, hogy egy blokk segítségével képezünk értékeket és azok segítségével létrehozzuk az objektum adott attribútumait.
+
+%pre
+  :preserve
+    class Szazadok
+      attr_reader :values
+      def initialize(size)
+        n = 0; @ertekek = []
+        size.times do
+          n += 1
+          value = yield(n) (1)
+          @values << value
+        end
+        end
+    end
+
+    Szazadok.new(3){ |n| n.to_s.upper+".század"(2) }
+    p Szazadok.values => ["1.század","2.század","3.század"]
+
+%p A lényeg az (1)-sel megjelölt kifejezésnél van, azaz a blokk visszatérő értékét(2) a yield kifejezés(metódus?) visszatérési értéke tartalmazza. Emlékezzünk csak, hogy a Ruby nyelvben egy kódblokk esetében a visszatérési érték mindig a legutolsónak kiértékelt sor visszaadott értéke - ha nem bíráljuk felül egy megfelelő helyre beszúrt <strong>return</strong> kulcsszóval. 
+%p A initialize metódus pedig a neki átadott értékből (3) tudja, hogy hányszor kell a neki átadott blokkot meghívnia.
+
+%p 
+  %em Természetesen a fenti programot ennél sokkal egyszerűbben is megoldhattuk volna, ezúttal csak a blokkok visszatérési értékének bemutatása volt a fő célom.
+
+%p Pontosan ez a működés zajlik le, amikor meghívjuk a bejegyzés elején bemutatott példát:
+%pre
+  :preserve
+    Array.new(3) { n += 1; n * 10 }
+    =>[10, 20, 30]
