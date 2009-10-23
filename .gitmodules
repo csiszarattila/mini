@@ -1,6 +1,6 @@
 [submodule "vendor/active_document"]
 	path = vendor/active_document
-	url = /Users/attilacsiszar/gitish/active_document
+	url = git://github.com/csiszarattila/active_document.git
 [submodule "vendor/rack"]
 	path = vendor/rack
 	url = git://github.com/rack/rack.git
