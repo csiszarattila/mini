@@ -12,9 +12,10 @@ require File.dirname(__FILE__) + '/models/article'
 require File.dirname(__FILE__) + '/models/post'
 
 # 
-# Sinatra alkalmazás
+# Sinatra application
 # 
-	
+class Mini < Sinatra::Application
+  
 set :environment, :command_line
 
 set :views, File.dirname(__FILE__) + '/views'
@@ -185,4 +186,6 @@ post '/:document_type/:title/comments' do
 	else
 		haml :document
 	end
+end
+
 end
