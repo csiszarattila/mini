@@ -318,6 +318,11 @@ form .input textarea{
  margin:0px;
 }
 
+form .teddypicker
+{
+ display:none;
+}
+
 form .error-messages p{
  margin:10px 1em;
  font-weight:bold;
