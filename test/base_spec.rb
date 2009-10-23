@@ -75,7 +75,7 @@ describe 'Mini' do
   end
   
   it "should not save if Honeypot captcha's value are set" do
-    @a_comment_to_post["comment[filter]"] = "abc";
+    @a_comment_to_post["filter"] = "abc";
     post '/bejegyzesek/sample-post/comments', @a_comment_to_post
 
     size_before_comment_posted = Post.find('sample_post').comments.size()

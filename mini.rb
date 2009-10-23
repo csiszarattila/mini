@@ -178,8 +178,8 @@ post '/:document_type/:title/comments' do
     @document = Article.find_by_prettified_title(params[:title])
 		document_url = article_path(@document) + "#comments"
 	end
-
-  redirect document_url unless params[:comment]["filter"] == ''
+	
+  redirect document_url and return unless params["filter"] == ''
 	@comment = Comment.new(params[:comment])
   if @document.add_comment( @comment )
 		redirect document_url
