@@ -111,9 +111,6 @@ get '/' do
 	haml :index
 end
 
-get '/cikkek/rss' do
-end
-
 get '/rss' do
 	@posts = Post.all.sort { |p, obj| obj.created_at <=> p.created_at }
 
