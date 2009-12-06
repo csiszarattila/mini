@@ -3,7 +3,6 @@
 $LOAD_PATH.push File.dirname(__FILE__) + '/vendor/rack/lib'
 $LOAD_PATH.push File.dirname(__FILE__) + '/vendor/sinatra/lib'
 
-require 'rubygems'
 require 'rack'
 
 module Rack
