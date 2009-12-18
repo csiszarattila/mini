@@ -2,6 +2,7 @@
 
 $LOAD_PATH.push File.dirname(__FILE__) + '/vendor/rack/lib'
 $LOAD_PATH.push File.dirname(__FILE__) + '/vendor/sinatra/lib'
+$LOAD_PATH.push '/home/csiszar/.gems/gems/maruku-0.6.0/lib'
 
 require 'rack'
 
