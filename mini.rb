@@ -74,6 +74,14 @@ helpers do
 	def post_path(post)
 		site_url + "/bejegyzesek/" + post.prettify_filename
 	end
+	
+	def doc_path(doc)
+	  if doc.kind_of? Article
+	    article_path(doc)
+	  elsif doc.class.kind_of? Post 
+	    post_path(doc)
+    end
+  end
 
 	def article_comments_path(article)
 		"#{article_path(article)}/comments#add-comment"
@@ -115,7 +123,7 @@ get '/cikkek/rss' do
 end
 
 get '/rss' do
-	@posts = Post.all.sort { |p, obj| obj.created_at <=> p.created_at }
+	@docs = (Post.all + Article.all).sort { |p, obj| obj.created_at <=> p.created_at }
 
 	builder do |xml|
 		xml.instruct! :xml, :version => '1.0'
@@ -129,13 +137,13 @@ get '/rss' do
 												:rel	=>	"self",
 												:type	=>	"application/rss+xml"
 			
-				@posts.each do |post|
+				@docs.each do |doc|
 					xml.item do
-						xml.title post.title
-						xml.link post_path(post)
-						xml.description post.body
-						xml.pubDate Time.parse(post.created_at.to_s).rfc822()
-						xml.guid post_path(post)
+						xml.title doc.title
+						xml.link doc_path(doc)
+						xml.description doc.body
+						xml.pubDate Time.parse(doc.created_at.to_s).rfc822()
+						xml.guid doc_path(doc)
 					end
 				end
 			end
